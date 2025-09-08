@@ -1,101 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>MCGG Match Predictor</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-    h2 {
-      margin-top: 30px;
-    }
-    table {
-      border-collapse: collapse;
-      margin-bottom: 20px;
-      width: 400px;
-    }
-    th, td {
-      border: 1px solid #333;
-      padding: 8px;
-      text-align: center;
-    }
-    .round-container {
-      margin-bottom: 30px;
-    }
-    button {
-      padding: 8px 15px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <title>MCGG Scheduler</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-gray-800 text-white p-6">
 
-  <h1>MCGG Match Predictor</h1>
+  <h1 class="text-2xl font-bold mb-4">MCGG Rotation Scheduler</h1>
 
-  <!-- Round 1 -->
-  <div class="round-container" id="round1">
-    <h2>Round 1</h2>
-    <table>
-      <tr><td><input id="r1m1a"></td><td>vs</td><td><input id="r1m1b"></td></tr>
-      <tr><td><input id="r1m2a"></td><td>vs</td><td><input id="r1m2b"></td></tr>
-      <tr><td><input id="r1m3a"></td><td>vs</td><td><input id="r1m3b"></td></tr>
-      <tr><td><input id="r1m4a"></td><td>vs</td><td><input id="r1m4b"></td></tr>
-    </table>
+  <!-- Player input -->
+  <div id="playerInputs" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6"></div>
+
+  <button id="btnGenerate" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded mb-6">Generate Dropdowns</button>
+
+  <!-- Rounds dropdowns -->
+  <div id="rounds"></div>
+
+  <div class="mt-4 hidden" id="roundsForm">
+    <button id="btnSolve" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded">Solve</button>
   </div>
 
-  <!-- Round 2 -->
-  <div class="round-container" id="round2">
-    <h2>Round 2</h2>
-    <table>
-      <tr><td><input id="r2m1a"></td><td>vs</td><td><input id="r2m1b"></td></tr>
-      <tr><td><input id="r2m2a"></td><td>vs</td><td><input id="r2m2b"></td></tr>
-      <tr><td><input id="r2m3a"></td><td>vs</td><td><input id="r2m3b"></td></tr>
-      <tr><td><input id="r2m4a"></td><td>vs</td><td><input id="r2m4b"></td></tr>
-    </table>
-  </div>
+  <!-- Output -->
+  <div id="output" class="mt-6"></div>
 
-  <!-- Round 3 -->
-  <div class="round-container" id="round3">
-    <h2>Round 3</h2>
-    <table>
-      <tr><td><input id="r3m1a"></td><td>vs</td><td><input id="r3m1b"></td></tr>
-      <tr><td><input id="r3m2a"></td><td>vs</td><td><input id="r3m2b"></td></tr>
-      <tr><td><input id="r3m3a"></td><td>vs</td><td><input id="r3m3b"></td></tr>
-      <tr><td><input id="r3m4a"></td><td>vs</td><td><input id="r3m4b"></td></tr>
-    </table>
-  </div>
-
-  <button onclick="generatePrediction()">Generate Prediction</button>
-
-  <div id="prediction"></div>
-
-  <script>
-    function generatePrediction() {
-      // contoh mudah: Round 4 auto rotate pairing dari Round 3
-      const r3pairs = [
-        [document.getElementById('r3m1a').value, document.getElementById('r3m1b').value],
-        [document.getElementById('r3m2a').value, document.getElementById('r3m2b').value],
-        [document.getElementById('r3m3a').value, document.getElementById('r3m3b').value],
-        [document.getElementById('r3m4a').value, document.getElementById('r3m4b').value],
-      ];
-
-      // Algoritma simple contoh: tukar pasangan (swap sebelah kanan naik 1)
-      const rightSide = r3pairs.map(p => p[1]);
-      const leftSide = r3pairs.map(p => p[0]);
-      const rotated = rightSide.slice(1).concat(rightSide[0]);
-
-      let html = "<h2>Prediction Round 4</h2><table>";
-      for (let i = 0; i < 4; i++) {
-        html += `<tr><td>${leftSide[i]}</td><td>vs</td><td>${rotated[i]}</td></tr>`;
-      }
-      html += "</table>";
-
-      document.getElementById("prediction").innerHTML = html;
-    }
-  </script>
-
+  <!-- Your script -->
+  <script src="script.js"></script>
 </body>
 </html>
