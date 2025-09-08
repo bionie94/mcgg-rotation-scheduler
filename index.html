@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MCGG Rotation Scheduler</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input { margin: 5px; }
+    table { border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #000; padding: 8px; text-align: center; }
+  </style>
+</head>
+<body>
+  <h2>MCGG Rotation Scheduler</h2>
+  <p>Isi nama P1 hingga P8:</p>
+  
+  <div id="inputs"></div>
+  <button onclick="generate()">Generate Schedule</button>
+
+  <div id="output"></div>
+
+  <script>
+    // Buat 8 input untuk nama
+    const inputDiv = document.getElementById('inputs');
+    for (let i = 1; i <= 8; i++) {
+      inputDiv.innerHTML += `<label>P${i}: <input id="p${i}" value="P${i}"></label><br>`;
+    }
+
+    function generate() {
+      let players = [];
+      for (let i = 1; i <= 8; i++) {
+        players.push(document.getElementById(`p${i}`).value || `P${i}`);
+      }
+
+      let schedule = [];
+      let arr = [...players];
+      let n = arr.length;
+
+      for (let round = 1; round < n; round++) {
+        let roundMatches = [];
+        for (let i = 0; i < n / 2; i++) {
+          roundMatches.push(`${arr[i]} vs ${arr[n - 1 - i]}`);
+        }
+        schedule.push({ round, matches: roundMatches });
+
+        // rotate (kecuali P1 fixed)
+        arr.splice(1, 0, arr.pop());
+      }
+
+      // print
+      let html = "<h3>Jadual Perlawanan</h3>";
+      schedule.forEach(r => {
+        html += `<h4>Round ${r.round}</h4><ul>`;
+        r.matches.forEach(m => html += `<li>${m}</li>`);
+        html += "</ul>";
+      });
+
+      document.getElementById('output').innerHTML = html;
+    }
+  </script>
+</body>
+</html>
