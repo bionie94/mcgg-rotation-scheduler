@@ -2,29 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>MCGG Scheduler</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Match Scheduler</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-800 text-white p-6">
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-6">
+  <h1 class="text-2xl font-bold text-indigo-400 mb-6">🎮 Match Scheduler</h1>
 
-  <h1 class="text-2xl font-bold mb-4">MCGG Rotation Scheduler</h1>
+  <!-- Input Nama Players -->
+  <div id="playerInputs" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 w-full max-w-2xl"></div>
 
-  <!-- Player input -->
-  <div id="playerInputs" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6"></div>
+  <!-- Butang Generate -->
+  <button id="btnGenerate" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg mb-6">
+    Generate Rounds
+  </button>
 
-  <button id="btnGenerate" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded mb-6">Generate Dropdowns</button>
-
-  <!-- Rounds dropdowns -->
-  <div id="rounds"></div>
-
-  <div class="mt-4 hidden" id="roundsForm">
-    <button id="btnSolve" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded">Solve</button>
+  <!-- Rounds Output -->
+  <div id="roundsForm" class="hidden w-full max-w-3xl">
+    <div id="rounds" class="space-y-8"></div>
   </div>
 
-  <!-- Output -->
-  <div id="output" class="mt-6"></div>
-
-  <!-- Your script -->
   <script src="script.js"></script>
 </body>
 </html>
