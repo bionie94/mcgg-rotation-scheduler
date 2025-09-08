@@ -2,36 +2,33 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>MCGG Rotation Scheduler</title>
+  <title>MCGG Match Predictor</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
+    body { font-family: Arial; padding: 20px; }
     input { margin: 5px; }
-    table { border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #000; padding: 8px; text-align: center; }
+    h3 { margin-top: 20px; }
   </style>
 </head>
 <body>
-  <h2>MCGG Rotation Scheduler</h2>
-  <p>Isi nama P1 hingga P8:</p>
+  <h2>MCGG Match Predictor</h2>
+
+  <h3>Isi Jadual Round 1 – 3</h3>
+  <textarea id="manualInput" rows="10" cols="50" placeholder="Contoh format:
+Round 1: P1 vs P8, P2 vs P7, P3 vs P6, P4 vs P5
+Round 2: P1 vs P7, P8 vs P6, P2 vs P5, P3 vs P4
+Round 3: P1 vs P6, ..."></textarea><br>
   
-  <div id="inputs"></div>
-  <button onclick="generate()">Generate Schedule</button>
+  <button onclick="generate()">Generate Prediction</button>
 
   <div id="output"></div>
 
   <script>
-    // Buat 8 input untuk nama
-    const inputDiv = document.getElementById('inputs');
-    for (let i = 1; i <= 8; i++) {
-      inputDiv.innerHTML += `<label>P${i}: <input id="p${i}" value="P${i}"></label><br>`;
-    }
-
     function generate() {
-      let players = [];
-      for (let i = 1; i <= 8; i++) {
-        players.push(document.getElementById(`p${i}`).value || `P${i}`);
-      }
+      const manual = document.getElementById("manualInput").value;
+      let html = "<h3>Round 1 – 3 (Manual)</h3><pre>" + manual + "</pre>";
 
+      // Player default list
+      let players = ["P1","P2","P3","P4","P5","P6","P7","P8"];
       let schedule = [];
       let arr = [...players];
       let n = arr.length;
@@ -42,20 +39,17 @@
           roundMatches.push(`${arr[i]} vs ${arr[n - 1 - i]}`);
         }
         schedule.push({ round, matches: roundMatches });
-
-        // rotate (kecuali P1 fixed)
-        arr.splice(1, 0, arr.pop());
+        arr.splice(1, 0, arr.pop()); // rotate
       }
 
-      // print
-      let html = "<h3>Jadual Perlawanan</h3>";
-      schedule.forEach(r => {
+      html += "<h3>Prediction Round 4 – 7</h3>";
+      schedule.filter(r => r.round > 3).forEach(r => {
         html += `<h4>Round ${r.round}</h4><ul>`;
         r.matches.forEach(m => html += `<li>${m}</li>`);
         html += "</ul>";
       });
 
-      document.getElementById('output').innerHTML = html;
+      document.getElementById("output").innerHTML = html;
     }
   </script>
 </body>
