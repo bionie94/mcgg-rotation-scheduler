@@ -1,0 +1,11 @@
+.match-box {
+  border: 2px solid #4B5563; /* gray-700 */
+  border-radius: 10px;
+  padding: 12px;
+  background-color: #1F2937; /* gray-800 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
