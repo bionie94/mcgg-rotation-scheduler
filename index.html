@@ -4,53 +4,20 @@
   <meta charset="UTF-8">
   <title>MCGG Match Predictor</title>
   <style>
-    body { font-family: Arial; padding: 20px; }
-    input { margin: 5px; }
-    h3 { margin-top: 20px; }
-  </style>
-</head>
-<body>
-  <h2>MCGG Match Predictor</h2>
-
-  <h3>Isi Jadual Round 1 – 3</h3>
-  <textarea id="manualInput" rows="10" cols="50" placeholder="Contoh format:
-Round 1: P1 vs P8, P2 vs P7, P3 vs P6, P4 vs P5
-Round 2: P1 vs P7, P8 vs P6, P2 vs P5, P3 vs P4
-Round 3: P1 vs P6, ..."></textarea><br>
-  
-  <button onclick="generate()">Generate Prediction</button>
-
-  <div id="output"></div>
-
-  <script>
-    function generate() {
-      const manual = document.getElementById("manualInput").value;
-      let html = "<h3>Round 1 – 3 (Manual)</h3><pre>" + manual + "</pre>";
-
-      // Player default list
-      let players = ["P1","P2","P3","P4","P5","P6","P7","P8"];
-      let schedule = [];
-      let arr = [...players];
-      let n = arr.length;
-
-      for (let round = 1; round < n; round++) {
-        let roundMatches = [];
-        for (let i = 0; i < n / 2; i++) {
-          roundMatches.push(`${arr[i]} vs ${arr[n - 1 - i]}`);
-        }
-        schedule.push({ round, matches: roundMatches });
-        arr.splice(1, 0, arr.pop()); // rotate
-      }
-
-      html += "<h3>Prediction Round 4 – 7</h3>";
-      schedule.filter(r => r.round > 3).forEach(r => {
-        html += `<h4>Round ${r.round}</h4><ul>`;
-        r.matches.forEach(m => html += `<li>${m}</li>`);
-        html += "</ul>";
-      });
-
-      document.getElementById("output").innerHTML = html;
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
     }
-  </script>
-</body>
-</html>
+    h2 {
+      margin-top: 30px;
+    }
+    table {
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      width: 400px;
+    }
+    th, td {
+      border: 1px solid #333;
+      padding: 8px;
+      text-align: center;
+    }
