@@ -1,118 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>MCGG Match Predictor (P1)</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      padding: 20px;
-      text-align: center;
-    }
-    h1 {
-      margin-bottom: 20px;
-    }
-    .player-inputs {
-      margin-bottom: 20px;
-    }
-    input {
-      margin: 5px;
-      padding: 5px;
-    }
-    button {
-      padding: 10px 20px;
-      margin: 10px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .round {
-      margin: 10px auto;
-      padding: 10px;
-      border: 2px solid #333;
-      width: 320px;
-      background: #fff;
-      border-radius: 10px;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MCGG Match Predictor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>MCGG Match Predictor (P1)</h1>
-  
-  <div class="player-inputs">
-    <label>P1 (You): <input id="P1" placeholder="Your name"></label><br>
-    <label>P2: <input id="P2" placeholder="Player 2"></label><br>
-    <label>P3: <input id="P3" placeholder="Player 3"></label><br>
-    <label>P4: <input id="P4" placeholder="Player 4"></label><br>
-    <label>P5: <input id="P5" placeholder="Player 5"></label><br>
-    <label>P6: <input id="P6" placeholder="Player 6"></label><br>
-    <label>P7: <input id="P7" placeholder="Player 7"></label><br>
-    <label>P8: <input id="P8" placeholder="Player 8"></label><br>
-  </div>
+<body class="bg-gray-950 text-gray-100 p-6">
+  <h1 class="text-2xl font-bold mb-4 text-indigo-400">MCGG Match Predictor</h1>
 
-  <button onclick="generateMatches()">Generate Matches</button>
+  <div id="playerInputs" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+  <button id="btnGenerate" class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">Generate Rounds</button>
 
-  <div id="schedule"></div>
+  <div id="rounds" class="mt-6 space-y-8"></div>
+  <button id="btnSolve" class="hidden mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Solve</button>
+
+  <div id="output" class="mt-6"></div>
 
   <script>
-    function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
-    }
-
-    function generateMatches() {
-      const players = [];
+    // --- Initialize player inputs ---
+    window.onload = () => {
+      const container = document.getElementById("playerInputs");
       for (let i = 1; i <= 8; i++) {
-        let name = document.getElementById("P" + i).value.trim();
-        if (!name) {
+        let div = document.createElement("div");
+        div.innerHTML = `
+          <label for="P${i}" class="block text-gray-400 text-sm mb-1 font-medium select-none">P${i}${i === 1 ? " (You)" : ""}</label>
+          <input id="P${i}" type="text" class="w-full rounded-md bg-gray-700 border border-gray-600 text-gray-200 px-3 py-2" placeholder="Player ${i} Name" />
+        `;
+        container.appendChild(div);
+      }
+    };
+
+    let players = [];
+
+    function generateDropdowns() {
+      players = [];
+      for (let i = 1; i <= 8; i++) {
+        let val = document.getElementById("P" + i).value.trim();
+        if (!val) {
           alert("All players (P1–P8) must be filled!");
           return;
         }
-        players.push(name);
+        players.push(val);
+      }
+      if (new Set(players).size !== 8) {
+        alert("Player names must be unique!");
+        return;
       }
 
-      const P1 = players[0]; // player utama
-      let history = [];
+      let roundsDiv = document.getElementById("rounds");
+      roundsDiv.innerHTML = "";
 
-      let rounds = [];
-
-      // Round 1–4 random
-      for (let r = 1; r <= 4; r++) {
-        let shuffled = shuffle([...players]);
-        let round = [];
-        for (let i = 0; i < shuffled.length; i += 2) {
-          round.push([shuffled[i], shuffled[i + 1]]);
-        }
-        // cari siapa lawan P1
-        let match = round.find(m => m.includes(P1));
-        let opponent = match[0] === P1 ? match[1] : match[0];
-        history.push(opponent);
-        rounds.push(`Round ${r}: ${P1} vs ${opponent}`);
-      }
-
-      // Round 5–7 prediction
-      let remaining = players.filter(p => p !== P1 && !history.includes(p));
-      for (let r = 5; r <= 7; r++) {
-        let opponent = remaining.shift();
-        if (opponent) {
-          history.push(opponent);
-          rounds.push(`Round ${r} (Prediction): ${P1} vs ${opponent}`);
-        }
-      }
-
-      // display
-      let container = document.getElementById("schedule");
-      container.innerHTML = "";
-      rounds.forEach(txt => {
-        let div = document.createElement("div");
-        div.className = "round";
-        div.innerText = txt;
-        container.appendChild(div);
+      ["Round I-2", "Round I-3", "Round I-4"].forEach((title) => {
+        let section = document.createElement("div");
+        section.className = "space-y-4";
+        let h3 = document.createElement("h3");
+        h3.className = "text-lg font-semibold text-indigo-300 select-none";
+        h3.textContent = title;
+        section.appendChild(h3);
+        section.appendChild(makeMatch(players[0], true));
+        for (let i = 0; i < 3; i++) section.appendChild(makeMatch(null, false));
+        roundsDiv.appendChild(section);
       });
+
+      document.getElementById("btnSolve").classList.remove("hidden");
     }
+
+    function makeMatch(fixed = null) {
+      let row = document.createElement("div");
+      row.className = "flex flex-col sm:flex-row items-center gap-2 mb-2 py-2";
+
+      function createInput(value, disabled = false) {
+        if (disabled) {
+          let input = document.createElement("input");
+          input.type = "text";
+          input.className =
+            "rounded-md bg-gray-700 border border-gray-600 text-gray-400 px-3 py-2 w-full sm:w-80% cursor-not-allowed";
+          input.value = value;
+          input.disabled = true;
+          return input;
+        } else {
+          let select = document.createElement("select");
+          select.className =
+            "player-select rounded-md bg-gray-700 border border-gray-600 text-gray-200 px-3 py-2 w-full sm:w-80%";
+          let optionDefault = document.createElement("option");
+          optionDefault.value = "";
+          optionDefault.textContent = "-- select --";
+          select.appendChild(optionDefault);
+          players
+            .filter((p) => p !== players[0])
+            .forEach((p) => {
+              let opt = document.createElement("option");
+              opt.value = p;
+              opt.textContent = p;
+              select.appendChild(opt);
+            });
+          if (value) select.value = value;
+          return select;
+        }
+      }
+
+      if (fixed) {
+        let inputFixed = createInput(fixed, true);
+        let vsSpan = document.createElement("span");
+        vsSpan.className = "text-gray-400 select-none";
+        vsSpan.textContent = "vs";
+        let selectOpp = createInput(null, false);
+        row.appendChild(inputFixed);
+        row.appendChild(vsSpan);
+        row.appendChild(selectOpp);
+      } else {
+        let select1 = createInput(null, false);
+        let vsSpan = document.createElement("span");
+        vsSpan.className = "text-gray-400 select-none";
+        vsSpan.textContent = "vs";
+        let select2 = createInput(null, false);
+        row.appendChild(select1);
+        row.appendChild(vsSpan);
+        row.appendChild(select2);
+      }
+      return row;
+    }
+
+    function getRound(roundIdx) {
+      let section = document.getElementById("rounds").children[roundIdx];
+      let inputs = section.querySelectorAll("input,select");
+      let pairs = [];
+      for (let i = 0; i < inputs.length; i += 2) {
+        let a = inputs[i].value;
+        let b = inputs[i + 1].value;
+        if (!a || !b) {
+          alert("All dropdowns must be selected!");
+          return null;
+        }
+        pairs.push([a, b]);
+      }
+      return pairs;
+    }
+
+    // --- Rotation algorithm ---
+    function generate_schedule(order, fixed, n_rounds = 12) {
+      let arr = order.slice();
+      let schedule = [];
+      for (let r = 1; r <= n_rounds; r++) {
+        let pairs = [
+          [arr[0], fixed],
+          [arr[1], arr[6]],
+          [arr[2], arr[5]],
+          [arr[3], arr[4]],
+        ];
+        schedule.push(pairs);
+        arr = [arr[6]].concat(arr.slice(0, 6));
+      }
+      return schedule;
+    }
+
+    function solve() {
+      let rounds = [];
+      for (let i = 0; i < 3; i++) {
+        let r = getRound(i);
+        if (!r) return;
+        rounds.push(r);
+      }
+
+      let container = document.getElementById("output");
+      container.innerHTML = "";
+
+      const p1 = players[0];
+
+      // Labels panjang sampai final
+      let labels = [
+        "I-2", "I-3", "I-4",
+        "II-1", "II-2", "II-3", "II-4",
+        "III-1", "III-2", "III-3", "III-4",
+        "IV-1", "IV-2", "IV-3", "IV-4",
+        "V-1 (Final)"
+      ];
+
+      let schedule = generate_schedule(
+        players.filter(p => p !== p1),
+        p1,
+        labels.length
+      );
+
+      let resultBox = document.createElement("pre");
+      resultBox.className =
+        "bg-gray-900 text-green-400 p-4 rounded-lg text-sm";
+
+      let outputText = "";
+      for (let r = 0; r < labels.length; r++) {
+        let matches = schedule[r];
+        let userMatch = matches.find(m => m.includes(p1));
+        let opponent = userMatch[0] === p1 ? userMatch[1] : userMatch[0];
+        outputText += `${labels[r]} : ${opponent}\n`;
+      }
+
+      resultBox.textContent = outputText;
+      container.appendChild(resultBox);
+    }
+
+    // Attach event listeners
+    document.getElementById("btnGenerate").addEventListener("click", generateDropdowns);
+    document.getElementById("btnSolve").addEventListener("click", solve);
   </script>
 </body>
 </html>
