@@ -1,80 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MCGG Match Predictor</title>
+  <meta charset="UTF-8">
+  <title>MCGG Match Predictor (P1)</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #111;
-      color: #eee;
-      text-align: center;
+      background: #f4f4f4;
       padding: 20px;
+      text-align: center;
     }
     h1 {
-      color: #4cafef;
+      margin-bottom: 20px;
     }
-    .input-box {
-      margin: 10px auto;
-      max-width: 300px;
+    .player-inputs {
+      margin-bottom: 20px;
     }
     input {
-      width: 100%;
-      padding: 8px;
-      margin: 4px 0;
-      border-radius: 6px;
-      border: 1px solid #555;
-      background: #222;
-      color: #fff;
+      margin: 5px;
+      padding: 5px;
     }
     button {
-      margin: 10px;
       padding: 10px 20px;
-      background: #4cafef;
-      border: none;
-      border-radius: 6px;
+      margin: 10px;
+      font-size: 16px;
       cursor: pointer;
-      color: #fff;
-      font-weight: bold;
     }
-    button:hover {
-      background: #3793cf;
-    }
-    pre {
-      background: #222;
-      color: #0f0;
-      padding: 15px;
-      border-radius: 8px;
-      text-align: left;
-      max-width: 400px;
-      margin: 20px auto;
+    .round {
+      margin: 10px auto;
+      padding: 10px;
+      border: 2px solid #333;
+      width: 320px;
+      background: #fff;
+      border-radius: 10px;
     }
   </style>
 </head>
 <body>
-  <h1>MCGG Match Predictor</h1>
-  <p>Masukkan nama 8 player (P1 adalah anda)</p>
+  <h1>MCGG Match Predictor (P1)</h1>
+  
+  <div class="player-inputs">
+    <label>P1 (You): <input id="P1" placeholder="Your name"></label><br>
+    <label>P2: <input id="P2" placeholder="Player 2"></label><br>
+    <label>P3: <input id="P3" placeholder="Player 3"></label><br>
+    <label>P4: <input id="P4" placeholder="Player 4"></label><br>
+    <label>P5: <input id="P5" placeholder="Player 5"></label><br>
+    <label>P6: <input id="P6" placeholder="Player 6"></label><br>
+    <label>P7: <input id="P7" placeholder="Player 7"></label><br>
+    <label>P8: <input id="P8" placeholder="Player 8"></label><br>
+  </div>
 
-  <div id="inputs"></div>
-  <button onclick="generate()">Generate Matches</button>
+  <button onclick="generateMatches()">Generate Matches</button>
 
-  <h2>Result (Siapa P1 jumpa)</h2>
-  <pre id="output"></pre>
+  <div id="schedule"></div>
 
   <script>
-    // Buat input box P1 - P8
-    const inputDiv = document.getElementById("inputs");
-    for (let i = 1; i <= 8; i++) {
-      let box = document.createElement("div");
-      box.className = "input-box";
-      box.innerHTML = `
-        <label for="P${i}">P${i} ${i === 1 ? "(You)" : ""}</label>
-        <input type="text" id="P${i}" placeholder="Player ${i}" />
-      `;
-      inputDiv.appendChild(box);
-    }
-
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -83,28 +63,55 @@
       return array;
     }
 
-    function generate() {
-      let players = [];
+    function generateMatches() {
+      const players = [];
       for (let i = 1; i <= 8; i++) {
-        let val = document.getElementById("P" + i).value.trim();
-        if (!val) {
-          alert("Sila isi semua nama player!");
+        let name = document.getElementById("P" + i).value.trim();
+        if (!name) {
+          alert("All players (P1–P8) must be filled!");
           return;
         }
-        players.push(val);
+        players.push(name);
       }
 
-      const P1 = players[0]; // anda
-      const others = players.slice(1);
-      let opponents = shuffle([...others]);
+      const P1 = players[0]; // player utama
+      let history = [];
 
-      // Round 1-7: P1 jumpa semua lawan sekali
-      let result = "";
-      for (let r = 1; r <= 7; r++) {
-        result += `Round ${r}: ${P1} vs ${opponents[r - 1]}\n`;
+      let rounds = [];
+
+      // Round 1–4 random
+      for (let r = 1; r <= 4; r++) {
+        let shuffled = shuffle([...players]);
+        let round = [];
+        for (let i = 0; i < shuffled.length; i += 2) {
+          round.push([shuffled[i], shuffled[i + 1]]);
+        }
+        // cari siapa lawan P1
+        let match = round.find(m => m.includes(P1));
+        let opponent = match[0] === P1 ? match[1] : match[0];
+        history.push(opponent);
+        rounds.push(`Round ${r}: ${P1} vs ${opponent}`);
       }
 
-      document.getElementById("output").textContent = result;
+      // Round 5–7 prediction
+      let remaining = players.filter(p => p !== P1 && !history.includes(p));
+      for (let r = 5; r <= 7; r++) {
+        let opponent = remaining.shift();
+        if (opponent) {
+          history.push(opponent);
+          rounds.push(`Round ${r} (Prediction): ${P1} vs ${opponent}`);
+        }
+      }
+
+      // display
+      let container = document.getElementById("schedule");
+      container.innerHTML = "";
+      rounds.forEach(txt => {
+        let div = document.createElement("div");
+        div.className = "round";
+        div.innerText = txt;
+        container.appendChild(div);
+      });
     }
   </script>
 </body>
