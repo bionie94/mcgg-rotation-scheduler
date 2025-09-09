@@ -3,26 +3,109 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Match Scheduler</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>MCGG Match Predictor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #eee;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #4cafef;
+    }
+    .input-box {
+      margin: 10px auto;
+      max-width: 300px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin: 4px 0;
+      border-radius: 6px;
+      border: 1px solid #555;
+      background: #222;
+      color: #fff;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      background: #4cafef;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #fff;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #3793cf;
+    }
+    pre {
+      background: #222;
+      color: #0f0;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: left;
+      max-width: 400px;
+      margin: 20px auto;
+    }
+  </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-6">
-  <h1 class="text-2xl font-bold text-indigo-400 mb-6">🎮 Match Scheduler</h1>
+<body>
+  <h1>MCGG Match Predictor</h1>
+  <p>Masukkan nama 8 player (P1 adalah anda)</p>
 
-  <!-- Input Nama Players -->
-  <div id="playerInputs" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 w-full max-w-2xl"></div>
+  <div id="inputs"></div>
+  <button onclick="generate()">Generate Matches</button>
 
-  <!-- Butang Generate -->
-  <button id="btnGenerate" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg mb-6">
-    Generate Rounds
-  </button>
+  <h2>Result (Siapa P1 jumpa)</h2>
+  <pre id="output"></pre>
 
-  <!-- Rounds Output -->
-  <div id="roundsForm" class="hidden w-full max-w-3xl">
-    <div id="rounds" class="space-y-8"></div>
-  </div>
+  <script>
+    // Buat input box P1 - P8
+    const inputDiv = document.getElementById("inputs");
+    for (let i = 1; i <= 8; i++) {
+      let box = document.createElement("div");
+      box.className = "input-box";
+      box.innerHTML = `
+        <label for="P${i}">P${i} ${i === 1 ? "(You)" : ""}</label>
+        <input type="text" id="P${i}" placeholder="Player ${i}" />
+      `;
+      inputDiv.appendChild(box);
+    }
 
-  <script src="script.js"></script>
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function generate() {
+      let players = [];
+      for (let i = 1; i <= 8; i++) {
+        let val = document.getElementById("P" + i).value.trim();
+        if (!val) {
+          alert("Sila isi semua nama player!");
+          return;
+        }
+        players.push(val);
+      }
+
+      const P1 = players[0]; // anda
+      const others = players.slice(1);
+      let opponents = shuffle([...others]);
+
+      // Round 1-7: P1 jumpa semua lawan sekali
+      let result = "";
+      for (let r = 1; r <= 7; r++) {
+        result += `Round ${r}: ${P1} vs ${opponents[r - 1]}\n`;
+      }
+
+      document.getElementById("output").textContent = result;
+    }
+  </script>
 </body>
 </html>
