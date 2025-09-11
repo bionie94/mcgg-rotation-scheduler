@@ -26,25 +26,23 @@
     </form>
   </div>
 
-  <script>
-    const form = document.getElementById('loginForm');
-    const error = document.getElementById('error');
+ <script>
+  document.getElementById("loginForm").addEventListener("submit", function(e) {
+    e.preventDefault();
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
 
-      // 👉 tukar username & password ikut suka
-      if (username === "admin" && password === "1234") {
-        // simpan status login
-        localStorage.setItem("loggedIn", "true");
-        // pergi ke index.html
-        window.location.href = "index.html";
-      } else {
-        error.classList.remove('hidden');
-      }
-    });
-  </script>
+    // hardcoded login
+    if (username === "admin" && password === "1234") {
+      localStorage.setItem("loggedIn", "true");
+      // redirect ke index.html dalam repo
+      window.location.href = "/mcgg-rotation-scheduler/index.html";
+    } else {
+      alert("Invalid username or password!");
+    }
+  });
+</script>
+  
 </body>
 </html>
