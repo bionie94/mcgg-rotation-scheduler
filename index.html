@@ -8,7 +8,13 @@
 </head>
 <body class="bg-gray-800 text-gray-100 min-h-screen p-6">
   <div class="max-w-3xl mx-auto space-y-6">
-    <h1 class="text-2xl font-bold text-center text-indigo-400">MCGG Rotation Scheduler</h1>
+    <!-- Header with Logout -->
+    <div class="flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-indigo-400">MCGG Rotation Scheduler</h1>
+      <button id="btnLogout" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">
+        Logout
+      </button>
+    </div>
 
     <!-- Player input -->
     <div id="playerInputs" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
@@ -25,13 +31,17 @@
   </div>
 
   <script src="script.js"></script>
-
-  <!-- 🔒 Tambah check login -->
   <script>
-    // kalau belum login → redirect ke login.html
-    if (localStorage.getItem("loggedIn") !== "true") {
+    // Check login status
+    if (!localStorage.getItem("loggedIn")) {
       window.location.href = "login.html";
     }
+
+    // Logout button
+    document.getElementById("btnLogout").addEventListener("click", () => {
+      localStorage.removeItem("loggedIn");
+      window.location.href = "login.html";
+    });
   </script>
 </body>
 </html>
