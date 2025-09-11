@@ -28,20 +28,21 @@
 
   <script>
     const form = document.getElementById('loginForm');
-    const errorText = document.getElementById('error');
+    const error = document.getElementById('error');
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
 
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-
-      // 🟢 Username & Password tetap (boleh ubah sini)
+      // 👉 tukar username & password ikut suka
       if (username === "admin" && password === "1234") {
+        // simpan status login
         localStorage.setItem("loggedIn", "true");
-        window.location.href = "index.html"; // pergi ke index
+        // pergi ke index.html
+        window.location.href = "index.html";
       } else {
-        errorText.classList.remove('hidden');
+        error.classList.remove('hidden');
       }
     });
   </script>
