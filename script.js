@@ -1,4 +1,4 @@
-// ---------- Inisialisasi UI: input nama pemain ----------
+// ---------- Inisialisasi UI: input nama pemain ----------//
 window.onload = () => {
   const cont = document.getElementById("playerInputs");
   cont.innerHTML = "";
