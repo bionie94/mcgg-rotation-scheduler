@@ -122,7 +122,7 @@ function solve() {
     players.push(v);
   }
 
-  // Ambil pilihan dari dropdown (5 ronde)
+  // Ambil pilihan dari dropdown
   const selects = Array.from(document.querySelectorAll("#rounds select"))
                        .sort((a,b) => Number(a.dataset.index) - Number(b.dataset.index));
   const chosen = selects.map(s => s.value).filter(v => v);
@@ -138,18 +138,33 @@ function solve() {
   // Cari lawan yang belum dipilih
   const remaining = players.filter(p => p !== players[0] && !chosen.includes(p));
 
-  if (remaining.length !== (titles.length - chosen.length)) {
-    alert("Data tidak konsisten. Sisa lawan tak cukup.");
+  // Baki lawan mesti = 2
+  if (remaining.length !== 2) {
+    alert("Data tidak konsisten. Baki lawan mesti 2 orang.");
     return;
   }
 
-  // Kemungkinan 1: urutan asal
-  const seq1 = [...chosen, ...remaining].map((p, idx) => `${titles[idx]} : ${p}`);
+  // Kemungkinan 1 = chosen + baki
+  let seq1 = [];
+  titles.forEach((title, idx) => {
+    if (idx < chosen.length) {
+      seq1.push(`${title} : ${chosen[idx]}`);
+    } else {
+      seq1.push(`${title} : ${remaining[idx - chosen.length]}`);
+    }
+  });
 
-  // Kemungkinan 2: chosen sama, baki dibalik (reverse)
-  const seq2 = [...chosen, ...remaining.slice().reverse()].map((p, idx) => `${titles[idx]} : ${p}`);
+  // Kemungkinan 2 = chosen + baki (dibalik)
+  let seq2 = [];
+  titles.forEach((title, idx) => {
+    if (idx < chosen.length) {
+      seq2.push(`${title} : ${chosen[idx]}`);
+    } else {
+      seq2.push(`${title} : ${remaining.reverse()[idx - chosen.length]}`);
+    }
+  });
 
-  // Papar result
+  // Render output
   const card = (title, seq) => {
     const div = document.createElement("div");
     div.className = "bg-gray-900 rounded p-4 border border-gray-700";
@@ -159,8 +174,7 @@ function solve() {
     const pre = document.createElement("pre");
     pre.className = "text-green-400 whitespace-pre-wrap font-mono text-sm";
     pre.textContent = seq.join("\n");
-    div.appendChild(h); 
-    div.appendChild(pre);
+    div.appendChild(h); div.appendChild(pre);
     return div;
   };
 
