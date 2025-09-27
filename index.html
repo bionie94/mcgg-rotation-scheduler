@@ -35,3 +35,38 @@
     <!-- Players -->
     <section class="bg-gray-800 rounded-2xl shadow-lg p-5">
       <h2 class="text-lg font-semibold text-indigo-300 mb-3">👥 Player Names</h2>
+      <div id="playerInputs" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+      <div class="mt-5 flex gap-3">
+        <button id="btnGenerate" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md shadow text-white font-semibold transition">
+          🎮 Generate Rounds
+        </button>
+        <button id="btnClear" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md shadow text-gray-200 transition">
+          🧹 Reset Inputs
+        </button>
+      </div>
+    </section>
+
+    <!-- Rounds input -->
+    <section id="roundsForm" class="bg-gray-800 rounded-2xl shadow-lg p-5 hidden">
+      <h2 class="text-lg font-semibold text-indigo-300 mb-4">📅 Isi Lawan (Round)</h2>
+      <div id="rounds" class="flex flex-col gap-3"></div>
+      <div class="mt-6">
+        <button id="btnSolve" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-md shadow text-white font-semibold transition">
+          🚀 Find Opponent Sequence
+        </button>
+      </div>
+    </section>
+
+    <!-- Output -->
+    <section id="outputSection" class="bg-gray-800 rounded-2xl shadow-lg p-5 hidden">
+      <h2 class="text-lg font-semibold text-indigo-300 mb-4">📋 Hasil Prediksi</h2>
+      <div id="output" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      <div class="mt-4 text-sm text-gray-400">Format: Kemungkinan 1 (kiri) dan Kemungkinan 2 (kanan).</div>
+    </section>
+
+  </main>
+
+  <!-- Script (betul pointing ke root file script.js) -->
+  <script src="script.js"></script>
+</body>
+</html>
