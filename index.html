@@ -1,69 +1,50 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Magic Chess : GO GO Predict</title>
-  <meta name="description" content="Magic Chess : GO GO Predict untuk prediksi lawan berikutnya di game MCGOGO.">
-  <meta name="keywords" content="login mcgogo, magic chess login, mcgogo predict login">
-  <link rel="canonical" href="https://mcgogopredict.com/" />
-  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/814/814513.png" type="image/png">
-
-  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'ui-sans-serif', 'system-ui'],
-          },
-        },
-      },
-    }
-  </script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen flex items-start justify-center p-6 font-sans">
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-6">
 
-  <main class="w-full max-w-4xl space-y-8">
+  <h1 class="text-3xl font-bold text-indigo-400 flex items-center gap-2 mb-2">
+    ⚔️ Magic Chess : GO GO Predict
+  </h1>
+  <p class="text-gray-300 mb-6">Masukkan 8 nama pemain (P1 = Kamu).</p>
 
-    <!-- Header -->
-    <header class="relative text-center">
-      <h1 class="text-3xl font-extrabold text-indigo-400 mb-1">⚔️ Magic Chess : GO GO Predict</h1>
-      <p class="text-gray-400">Masukkan 8 nama pemain (P1 = Kamu).</p>
-    </header>
+  <!-- Input Player -->
+  <div class="bg-gray-800 p-6 rounded-lg w-full max-w-2xl mb-6">
+    <h2 class="text-indigo-400 font-semibold mb-4 flex items-center gap-2">👥 Player Names</h2>
+    <div id="playerInputs" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+    <div class="flex gap-3 mt-4">
+      <button id="btnGenerate" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded font-medium">
+        🎮 Generate Rounds
+      </button>
+      <button id="btnClear" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded font-medium">
+        🧹 Reset Inputs
+      </button>
+    </div>
+  </div>
 
-    <!-- Players -->
-    <section class="bg-gray-800 rounded-2xl shadow-lg p-5">
-      <h2 class="text-lg font-semibold text-indigo-300 mb-3">👥 Player Names</h2>
-      <div id="playerInputs" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
-      <div class="mt-5 flex gap-3">
-        <button id="btnGenerate" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md shadow text-white font-semibold transition">🎮 Generate Rounds</button>
-        <button id="btnClear" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md shadow text-gray-200 transition">🧹 Reset Inputs</button>
-      </div>
-    </section>
+  <!-- Isi Lawan -->
+  <form id="roundsForm" class="bg-gray-800 p-6 rounded-lg w-full max-w-2xl mb-6 hidden">
+    <h2 class="text-indigo-400 font-semibold mb-4">📋 Isi Lawan (Round)</h2>
+    <div id="rounds" class="space-y-3"></div>
+    <button type="button" id="btnSolve" class="bg-green-600 hover:bg-green-700 px-4 py-2 mt-4 rounded font-medium">
+      🔍 Find Opponent Sequence
+    </button>
+  </form>
 
-    <!-- Rounds input -->
-    <section id="roundsForm" class="bg-gray-800 rounded-2xl shadow-lg p-5 hidden">
-      <h2 class="text-lg font-semibold text-indigo-300 mb-4">📅 Isi Lawan (Round)</h2>
-      <div id="rounds" class="flex flex-col gap-3"></div>
-      <div class="mt-6">
-        <button id="btnSolve" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-md shadow text-white font-semibold transition">🚀 Find Opponent Sequence</button>
-      </div>
-    </section>
+  <!-- Output -->
+  <div id="outputSection" class="bg-gray-800 p-6 rounded-lg w-full max-w-4xl hidden">
+    <h2 class="text-indigo-400 font-semibold mb-4">📑 Hasil Prediksi</h2>
+    <div id="output" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    <p class="text-gray-400 mt-4 text-sm">
+      Format: Kemungkinan 1 (kiri) dan Kemungkinan 2 (kanan).
+    </p>
+  </div>
 
-    <!-- Output -->
-    <section id="outputSection" class="bg-gray-800 rounded-2xl shadow-lg p-5 hidden">
-      <h2 class="text-lg font-semibold text-indigo-300 mb-4">📋 Hasil Prediksi</h2>
-      <div id="output" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-      <div class="mt-4 text-sm text-gray-400">Format: Kemungkinan 1 (kiri) dan Kemungkinan 2 (kanan).</div>
-    </section>
-
-  </main>
-
-  <!-- Link ke script kita -->
   <script src="script.js"></script>
 </body>
 </html>
