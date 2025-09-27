@@ -1,43 +1,208 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Magic Chess : GO GO Predict</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center py-6">
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center py-8">
 
-  <h1 class="text-3xl font-bold text-indigo-400 mb-2">⚔ Magic Chess : GO GO Predict</h1>
+  <!-- Title -->
+  <h1 class="text-3xl font-bold text-indigo-400 mb-2">🪄 Magic Chess : GO GO Predict</h1>
   <p class="mb-6 text-gray-400">Masukkan 8 nama pemain (P1 = Kamu).</p>
 
   <!-- Player Names -->
-  <div id="playerInputs" class="bg-gray-800 p-4 rounded-lg shadow-md w-full max-w-2xl space-y-2">
-    <h2 class="text-lg font-semibold text-indigo-300 mb-2">👥 Player Names</h2>
-    <!-- Input nama pemain auto keluar dari script.js -->
+  <div id="playerInputs" class="grid grid-cols-4 gap-4 bg-gray-800 p-6 rounded-lg shadow-md w-full max-w-3xl">
+    <h2 class="col-span-4 text-lg font-semibold text-indigo-300 mb-2">👥 Player Names</h2>
   </div>
 
   <!-- Buttons -->
-  <div class="flex gap-3 mt-4">
-    <button id="btnGenerate" class="px-4 py-2 bg-indigo-600 rounded hover:bg-indigo-700">🎮 Generate Rounds</button>
-    <button id="btnClear" class="px-4 py-2 bg-gray-600 rounded hover:bg-gray-700">🧹 Reset Inputs</button>
+  <div class="flex gap-4 mt-4">
+    <button id="btnGenerate" class="px-4 py-2 rounded bg-indigo-600 hover:bg-indigo-700 font-medium">🎮 Generate Rounds</button>
+    <button id="btnClear" class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 font-medium">🧹 Reset Inputs</button>
   </div>
 
   <!-- Rounds Form -->
-  <div id="roundsForm" class="bg-gray-800 p-4 rounded-lg shadow-md w-full max-w-2xl mt-6 hidden">
+  <div id="roundsForm" class="hidden mt-8 w-full max-w-2xl">
     <h2 class="text-lg font-semibold text-indigo-300 mb-2">📑 Isi Lawan (Round)</h2>
-    <div id="rounds" class="space-y-2"></div>
-    <button id="btnSolve" class="mt-4 px-4 py-2 bg-green-600 rounded hover:bg-green-700">🚀 Find Opponent Sequence</button>
+    <div id="rounds" class="flex flex-col gap-3"></div>
+    <button id="btnSolve" class="mt-4 px-4 py-2 rounded bg-green-600 hover:bg-green-700 font-medium">🚀 Find Opponent Sequence</button>
   </div>
 
-  <!-- Output -->
-  <div id="outputSection" class="bg-gray-800 p-4 rounded-lg shadow-md w-full max-w-2xl mt-6 hidden">
+  <!-- Output Section -->
+  <div id="outputSection" class="hidden mt-8 w-full max-w-3xl">
     <h2 class="text-lg font-semibold text-indigo-300 mb-2">📄 Hasil Prediksi</h2>
-    <div id="output" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-    <p class="mt-3 text-sm text-gray-400">Format: Kemungkinan 1 (kiri) dan Kemungkinan 2 (kanan).</p>
+    <div id="output" class="grid grid-cols-2 gap-4"></div>
+    <p class="mt-2 text-gray-400 text-sm">Format: Kemungkinan 1 (kiri) dan Kemungkinan 2 (kanan).</p>
   </div>
 
   <!-- Script -->
-  <script src="script.js"></script>
+  <script>
+    // ---------- UI Input Player (2x4 grid) ----------
+    window.onload = () => {
+      const cont = document.getElementById("playerInputs");
+      cont.innerHTML = '<h2 class="col-span-4 text-lg font-semibold text-indigo-300 mb-2">👥 Player Names</h2>';
+      for (let i = 1; i <= 8; i++) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "flex flex-col";
+        wrapper.innerHTML = `
+          <label for="P${i}" class="text-sm text-gray-300 mb-1 select-none">P${i} ${i===1 ? "(You)" : ""}</label>
+          <input id="P${i}" type="text"
+                 class="px-3 py-2 rounded bg-gray-700 border border-gray-600 
+                        placeholder-gray-500 focus:outline-none focus:ring-2 
+                        focus:ring-indigo-500 text-gray-200"
+                 placeholder="Player ${i} name"/>
+        `;
+        cont.appendChild(wrapper);
+      }
+    };
+
+    let players = [];
+
+    document.getElementById("btnGenerate").addEventListener("click", generateDropdowns);
+    document.getElementById("btnClear").addEventListener("click", () => {
+      players = [];
+      document.getElementById("roundsForm").classList.add("hidden");
+      document.getElementById("outputSection").classList.add("hidden");
+      window.onload();
+    });
+
+    // ---------- Generate Rounds ----------
+    function generateDropdowns() {
+      players = [];
+      for (let i = 1; i <= 8; i++) {
+        const v = document.getElementById("P" + i).value.trim();
+        if (!v) { alert("Semua nama pemain (P1–P8) harus diisi."); return; }
+        players.push(v);
+      }
+      if (new Set(players.map(x => x.toLowerCase())).size !== 8) {
+        alert("Nama pemain harus unik (case-insensitive).");
+        return;
+      }
+
+      const titles = ["I-2","I-3","I-4","II-1","II-2"];
+      const roundsDiv = document.getElementById("rounds");
+      roundsDiv.innerHTML = "";
+
+      titles.forEach((title, idx) => {
+        const row = document.createElement("div");
+        row.className = "flex items-center gap-3 bg-gray-700 p-3 rounded";
+
+        const label = document.createElement("div");
+        label.className = "w-16 text-sm text-gray-300";
+        label.textContent = title;
+
+        const fixed = document.createElement("input");
+        fixed.type = "text";
+        fixed.value = players[0];
+        fixed.disabled = true;
+        fixed.className = "px-3 py-2 rounded bg-gray-800 border border-gray-700 text-gray-400 w-28 cursor-not-allowed";
+
+        const vs = document.createElement("div");
+        vs.className = "text-gray-300 font-medium";
+        vs.textContent = "vs";
+
+        const sel = document.createElement("select");
+        sel.className = "px-3 py-2 rounded bg-gray-800 border border-gray-700 text-gray-200 w-full";
+        sel.dataset.index = idx;
+        sel.innerHTML = `<option value="">-- pilih lawan --</option>`;
+
+        row.appendChild(label);
+        row.appendChild(fixed);
+        row.appendChild(vs);
+        row.appendChild(sel);
+        roundsDiv.appendChild(row);
+      });
+
+      updateDropdowns();
+      document.querySelectorAll("#rounds select").forEach(sel => {
+        sel.addEventListener("change", updateDropdowns);
+      });
+
+      document.getElementById("roundsForm").classList.remove("hidden");
+      document.getElementById("outputSection").classList.add("hidden");
+    }
+
+    // update dropdown
+    function updateDropdowns() {
+      const selects = Array.from(document.querySelectorAll("#rounds select"));
+      const used = selects.map(s => s.value).filter(v => v);
+
+      selects.forEach(sel => {
+        const current = sel.value;
+        const opts = ["<option value=''>-- pilih lawan --</option>"]
+          .concat(
+            players.filter(p => p !== players[0] && (!used.includes(p) || p === current))
+                   .map(p => `<option value="${escapeHtml(p)}" ${p===current?"selected":""}>${escapeHtml(p)}</option>`)
+          ).join("");
+        sel.innerHTML = opts;
+      });
+    }
+
+    function escapeHtml(s) {
+      return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+    }
+
+    // ---------- Solve (dummy generate) ----------
+    document.getElementById("btnSolve").addEventListener("click", solve);
+
+    function solve() {
+      const outputSection = document.getElementById("outputSection");
+      const output = document.getElementById("output");
+      output.innerHTML = "";
+      outputSection.classList.add("hidden");
+
+      const players = [];
+      for (let i = 1; i <= 8; i++) {
+        const v = document.getElementById("P"+i).value.trim();
+        if (!v) { alert("Semua nama pemain (P1–P8) harus diisi."); return; }
+        players.push(v);
+      }
+
+      // ambil pilihan dropdown
+      const selects = Array.from(document.querySelectorAll("#rounds select"))
+                           .sort((a,b) => Number(a.dataset.index) - Number(b.dataset.index));
+      const chosen = selects.map(s => s.value).filter(v => v);
+
+      if (chosen.length < 5) {
+        alert("Isi semua 5 ronde terlebih dahulu.");
+        return;
+      }
+
+      // dummy titles
+      const titles = ["II-4","II-5","II-6","III-1","III-2","III-4","III-5","III-6","IV-1","IV-2","IV-4","IV-5"];
+
+      // --- buat 2 kemungkinan dummy (random shuffle) ---
+      function shuffle(arr) {
+        return arr.map(x => [Math.random(), x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+      }
+
+      const remaining = players.filter(p => p !== players[0]);
+      const shuffled1 = shuffle(remaining).slice(0, titles.length);
+      const shuffled2 = shuffle(remaining).slice(0, titles.length);
+
+      const seq1 = titles.map((t,i)=>`${t} : ${shuffled1[i]}`);
+      const seq2 = titles.map((t,i)=>`${t} : ${shuffled2[i]}`);
+
+      const card = (title, seq) => {
+        const div = document.createElement("div");
+        div.className = "bg-gray-900 rounded p-4 border border-gray-700";
+        const h = document.createElement("h3");
+        h.className = "text-indigo-300 font-semibold mb-2";
+        h.textContent = title;
+        const pre = document.createElement("pre");
+        pre.className = "text-green-400 whitespace-pre-wrap font-mono text-sm";
+        pre.textContent = seq.join("\n");
+        div.appendChild(h); div.appendChild(pre);
+        return div;
+      };
+
+      output.appendChild(card("Kemungkinan 1", seq1));
+      output.appendChild(card("Kemungkinan 2", seq2));
+      outputSection.classList.remove("hidden");
+      output.scrollIntoView({behavior:"smooth", block:"center"});
+    }
+  </script>
 </body>
 </html>
