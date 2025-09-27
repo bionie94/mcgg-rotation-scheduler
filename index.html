@@ -5,219 +5,185 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Magic Chess : GO GO Predict</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .rainbow-text {
-      background: linear-gradient(
-        90deg,
-        #ff0000, #ff9900, #ffee00, #33cc33, #3399ff, #9900cc, #ff3399
-      );
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-size: 400% 400%;
-      animation: rainbow 6s ease infinite;
-    }
-    @keyframes rainbow {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-  </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col items-center py-6">
 
-  <!-- Title -->
-  <h1 class="text-4xl font-extrabold mb-2 rainbow-text">⚔ Magic Chess : GO GO Predict</h1>
+  <!-- Header -->
+  <h1 class="text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-yellow-400 to-blue-400 animate-pulse">
+    ✨ Magic Chess : GO GO Predict ✨
+  </h1>
   <p class="mb-6 text-gray-400">Masukkan 8 nama pemain (P1 = Kamu).</p>
 
   <!-- Player Inputs -->
-  <div class="bg-gray-800 p-6 rounded-xl shadow-lg w-full max-w-3xl mb-6">
-    <h2 class="text-xl font-semibold text-indigo-300 mb-4">👥 Player Names</h2>
-    <div id="playerInputs" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
-    <div class="flex gap-3 mt-4">
-      <button id="btnGenerate" class="px-4 py-2 bg-indigo-600 rounded hover:bg-indigo-700 transition">🎮 Generate Rounds</button>
-      <button id="btnClear" class="px-4 py-2 bg-gray-600 rounded hover:bg-gray-700 transition">🧹 Reset Inputs</button>
-    </div>
+  <div id="playerInputs" class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-3xl mb-6"></div>
+
+  <!-- Action Buttons -->
+  <div class="flex gap-4 mb-6">
+    <button id="btnGenerate" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold">
+      🎮 Generate Rounds
+    </button>
+    <button id="btnClear" class="px-6 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg font-semibold">
+      🧹 Reset Inputs
+    </button>
   </div>
 
-  <!-- Isi Lawan -->
-  <div id="roundsForm" class="hidden bg-gray-800 p-6 rounded-xl shadow-lg w-full max-w-3xl mb-6">
-    <h2 class="text-xl font-semibold text-indigo-300 mb-4">📑 Isi Lawan (Round)</h2>
-    <div id="rounds" class="flex flex-col gap-3"></div>
-    <button id="btnSolve" class="mt-4 px-4 py-2 bg-green-600 rounded hover:bg-green-700 transition">🚀 Find Opponent Sequence</button>
-  </div>
+  <!-- Rounds -->
+  <form id="roundsForm" class="hidden w-full max-w-2xl mb-6">
+    <div id="rounds" class="space-y-3"></div>
+    <button type="button" id="btnSolve" class="mt-4 px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg font-semibold">
+      🚀 Find Opponent Sequence
+    </button>
+  </form>
 
-  <!-- Hasil Prediksi -->
-  <div id="outputSection" class="hidden bg-gray-800 p-6 rounded-xl shadow-lg w-full max-w-5xl">
-    <h2 class="text-xl font-semibold text-indigo-300 mb-4">📋 Hasil Prediksi</h2>
-    <div id="output" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-    <p class="mt-4 text-gray-400 text-sm">Format: Kemungkinan 1 (kiri) dan Kemungkinan 2 (kanan).</p>
+  <!-- Output -->
+  <div id="outputSection" class="hidden w-full max-w-4xl">
+    <h2 class="text-2xl font-bold mb-4">📑 Hasil Prediksi</h2>
+    <div id="output" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
   </div>
 
 <script>
-  // ---------- Init UI ----------
-  window.onload = () => {
-    const cont = document.getElementById("playerInputs");
-    cont.innerHTML = "";
-    for (let i = 1; i <= 8; i++) {
-      const wrapper = document.createElement("div");
-      wrapper.className = "flex flex-col";
-      wrapper.innerHTML = `
-        <label for="P${i}" class="text-sm text-gray-300 mb-1 select-none">P${i} ${i===1 ? "(You)" : ""}</label>
-        <input id="P${i}" type="text"
-               class="px-3 py-2 rounded bg-gray-700 border border-gray-600 placeholder-gray-500
-                      focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-200"
-               placeholder="Player ${i} name"/>
-      `;
-      cont.appendChild(wrapper);
-    }
-  };
+// ---------- Inisialisasi UI ----------
+window.onload = () => {
+  const cont = document.getElementById("playerInputs");
+  cont.innerHTML = "";
+  for (let i = 1; i <= 8; i++) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "flex flex-col";
+    wrapper.innerHTML = `
+      <label for="P${i}" class="text-sm text-gray-300 mb-1 select-none">P${i} ${i===1 ? "(You)" : ""}</label>
+      <input id="P${i}" type="text" class="px-3 py-2 rounded bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Player ${i} name"/>
+    `;
+    cont.appendChild(wrapper);
+  }
+};
 
-  let players = [];
+// global
+let players = [];
 
-  document.getElementById("btnGenerate").addEventListener("click", generateDropdowns);
-  document.getElementById("btnClear").addEventListener("click", () => {
-    players = [];
-    document.getElementById("roundsForm").classList.add("hidden");
-    document.getElementById("outputSection").classList.add("hidden");
-    window.onload();
+// tombol generate
+document.getElementById("btnGenerate").addEventListener("click", generateDropdowns);
+document.getElementById("btnClear").addEventListener("click", () => { window.onload(); });
+
+// ---------- Buat dropdown (rounds) ----------
+function generateDropdowns() {
+  players = [];
+  for (let i = 1; i <= 8; i++) {
+    const v = document.getElementById("P"+i).value.trim();
+    if (!v) { alert("Semua nama pemain (P1–P8) harus diisi."); return; }
+    players.push(v);
+  }
+
+  if (new Set(players.map(x => x.toLowerCase())).size !== 8) {
+    alert("Nama pemain harus unik.");
+    return;
+  }
+
+  const titles = ["I-2","I-3","I-4","II-1","II-2"];
+  const roundsDiv = document.getElementById("rounds");
+  roundsDiv.innerHTML = "";
+
+  titles.forEach((title, idx) => {
+    const row = document.createElement("div");
+    row.className = "flex items-center gap-3 bg-gray-800 p-3 rounded";
+
+    const label = document.createElement("div");
+    label.className = "w-16 text-sm text-gray-300";
+    label.textContent = title;
+
+    const fixed = document.createElement("input");
+    fixed.type = "text";
+    fixed.value = players[0];
+    fixed.disabled = true;
+    fixed.className = "px-3 py-2 rounded bg-gray-700 text-gray-400 w-28";
+
+    const vs = document.createElement("div");
+    vs.className = "text-gray-300 font-medium";
+    vs.textContent = "vs";
+
+    const sel = document.createElement("select");
+    sel.className = "px-3 py-2 rounded bg-gray-700 border border-gray-600 text-white w-full";
+    sel.dataset.index = idx;
+    sel.innerHTML = `<option value="">-- pilih lawan --</option>` + 
+      players.slice(1).map(p => `<option value="${p}">${p}</option>`).join("");
+
+    row.appendChild(label);
+    row.appendChild(fixed);
+    row.appendChild(vs);
+    row.appendChild(sel);
+    roundsDiv.appendChild(row);
   });
 
-  // ---------- Generate dropdown ----------
-  function generateDropdowns() {
-    players = [];
-    for (let i = 1; i <= 8; i++) {
-      const v = document.getElementById("P"+i).value.trim();
-      if (!v) { alert("Semua nama pemain (P1–P8) harus diisi."); return; }
-      players.push(v);
-    }
-    if (new Set(players.map(x => x.toLowerCase())).size !== 8) {
-      alert("Nama pemain harus unik.");
-      return;
-    }
+  document.getElementById("roundsForm").classList.remove("hidden");
+  document.getElementById("outputSection").classList.add("hidden");
+}
 
-    const titles = ["I-2","I-3","I-4","II-1","II-2"];
-    const roundsDiv = document.getElementById("rounds");
-    roundsDiv.innerHTML = "";
+// ---------- Solve (cloning solve.php) ----------
+document.getElementById("btnSolve").addEventListener("click", solve);
 
-    titles.forEach((title, idx) => {
-      const row = document.createElement("div");
-      row.className = "flex items-center gap-3 bg-gray-700 p-3 rounded";
+function solve() {
+  const outputSection = document.getElementById("outputSection");
+  const output = document.getElementById("output");
+  output.innerHTML = "";
+  outputSection.classList.add("hidden");
 
-      const label = document.createElement("div");
-      label.className = "w-16 text-sm text-gray-300";
-      label.textContent = title;
-
-      const fixed = document.createElement("input");
-      fixed.type = "text";
-      fixed.value = players[0];
-      fixed.disabled = true;
-      fixed.className = "px-3 py-2 rounded bg-gray-800 border border-gray-700 text-gray-400 w-28";
-
-      const vs = document.createElement("div");
-      vs.className = "text-gray-300 font-medium";
-      vs.textContent = "vs";
-
-      const sel = document.createElement("select");
-      sel.className = "px-3 py-2 rounded bg-gray-800 border border-gray-700 text-gray-200 w-full";
-      sel.dataset.index = idx;
-      sel.innerHTML = `<option value="">-- pilih lawan --</option>`;
-
-      row.appendChild(label);
-      row.appendChild(fixed);
-      row.appendChild(vs);
-      row.appendChild(sel);
-      roundsDiv.appendChild(row);
-    });
-
-    updateDropdowns();
-    document.querySelectorAll("#rounds select").forEach(sel => {
-      sel.addEventListener("change", updateDropdowns);
-    });
-
-    document.getElementById("roundsForm").classList.remove("hidden");
-    document.getElementById("outputSection").classList.add("hidden");
+  // ambil player
+  const players = [];
+  for (let i = 1; i <= 8; i++) {
+    players.push(document.getElementById("P"+i).value.trim());
   }
 
-  function updateDropdowns() {
-    const selects = Array.from(document.querySelectorAll("#rounds select"));
-    const used = selects.map(s => s.value).filter(v => v);
+  // ambil pilihan dropdown
+  const selects = Array.from(document.querySelectorAll("#rounds select"))
+                       .sort((a,b) => Number(a.dataset.index) - Number(b.dataset.index));
+  const chosen = selects.map(s => s.value).filter(v => v);
 
-    selects.forEach(sel => {
-      const current = sel.value;
-      const opts = ["<option value=''>-- pilih lawan --</option>"]
-        .concat(
-          players.filter(p => p !== players[0] && (!used.includes(p) || p === current))
-                 .map(p => `<option value="${escapeHtml(p)}" ${p===current?"selected":""}>${escapeHtml(p)}</option>`)
-        ).join("");
-      sel.innerHTML = opts;
+  if (chosen.length < 5) {
+    alert("Isi semua 5 ronde terlebih dahulu.");
+    return;
+  }
+
+  // cari baki lawan
+  const remaining = players.slice(1).filter(p => !chosen.includes(p));
+  if (remaining.length !== 2) {
+    alert("Data tidak konsisten. Sisa lawan mesti 2.");
+    return;
+  }
+
+  const rounds = ["II-4","II-5","II-6","III-1","III-2","III-4","III-5","III-6","IV-1","IV-2","IV-4","IV-5"];
+
+  function buildSequence(order) {
+    let seq = {};
+    let idx = 0;
+    rounds.forEach(r => {
+      seq[r] = order[idx % order.length];
+      idx++;
     });
+    return seq;
   }
 
-  function escapeHtml(s) {
-    return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
-  }
+  const k1 = buildSequence(remaining);
+  const k2 = buildSequence(remaining.slice().reverse());
 
-  // ---------- Solve ----------
-  document.getElementById("btnSolve").addEventListener("click", solve);
+  // render
+  const card = (title, seq) => {
+    const div = document.createElement("div");
+    div.className = "bg-gray-900 rounded p-4 border border-gray-700";
+    const h = document.createElement("h3");
+    h.className = "text-indigo-300 font-semibold mb-2";
+    h.textContent = title;
+    const pre = document.createElement("pre");
+    pre.className = "text-green-400 whitespace-pre-wrap font-mono text-sm";
+    pre.textContent = Object.entries(seq).map(([k,v]) => `${k} : ${v}`).join("\n");
+    div.appendChild(h); div.appendChild(pre);
+    return div;
+  };
 
-  function solve() {
-    const outputSection = document.getElementById("outputSection");
-    const output = document.getElementById("output");
-    output.innerHTML = "";
-    outputSection.classList.add("hidden");
-
-    const players = [];
-    for (let i = 1; i <= 8; i++) {
-      const v = document.getElementById("P"+i).value.trim();
-      if (!v) { alert("Semua nama pemain (P1–P8) harus diisi."); return; }
-      players.push(v);
-    }
-
-    const selects = Array.from(document.querySelectorAll("#rounds select"))
-                         .sort((a,b) => Number(a.dataset.index) - Number(b.dataset.index));
-    const chosen = selects.map(s => s.value).filter(v => v);
-
-    if (chosen.length < 5) { alert("Isi semua 5 ronde terlebih dahulu."); return; }
-
-    const titles = ["II-4","II-5","II-6","III-1","III-2","III-4","III-5","III-6","IV-1","IV-2","IV-4","IV-5"];
-    const remaining = players.filter(p => p !== players[0] && !chosen.includes(p));
-
-    // pool kemungkinan 1 & 2
-    let pool1 = remaining;
-    let pool2 = [...remaining].reverse();
-
-    let seq1 = [], seq2 = [];
-
-    titles.forEach((title, idx) => {
-      if (idx < chosen.length) {
-        seq1.push(`${title} : ${chosen[idx]}`);
-        seq2.push(`${title} : ${chosen[idx]}`);
-      } else {
-        let r1 = pool1[(idx - chosen.length) % pool1.length];
-        let r2 = pool2[(idx - chosen.length) % pool2.length];
-        seq1.push(`${title} : ${r1}`);
-        seq2.push(`${title} : ${r2}`);
-      }
-    });
-
-    const card = (title, seq) => {
-      const div = document.createElement("div");
-      div.className = "bg-gray-900 rounded p-4 border border-gray-700";
-      const h = document.createElement("h3");
-      h.className = "text-indigo-300 font-semibold mb-2";
-      h.textContent = title;
-      const pre = document.createElement("pre");
-      pre.className = "text-green-400 whitespace-pre-wrap font-mono text-sm";
-      pre.textContent = seq.join("\n");
-      div.appendChild(h); div.appendChild(pre);
-      return div;
-    };
-
-    output.appendChild(card("Kemungkinan 1", seq1));
-    output.appendChild(card("Kemungkinan 2", seq2));
-    outputSection.classList.remove("hidden");
-    output.scrollIntoView({behavior:"smooth", block:"center"});
-  }
+  output.appendChild(card("Kemungkinan 1", k1));
+  output.appendChild(card("Kemungkinan 2", k2));
+  outputSection.classList.remove("hidden");
+  output.scrollIntoView({behavior:"smooth", block:"center"});
+}
 </script>
+
 </body>
 </html>
