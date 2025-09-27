@@ -6,12 +6,14 @@ window.onload = () => {
     const wrapper = document.createElement("div");
     wrapper.className = "flex flex-col";
     wrapper.innerHTML = `
-      <label for="P${i}" class="text-sm text-gray-300 mb-1 select-none">P${i} ${i===1 ? "(You)" : ""}</label>
-      <input id="P${i}" type="text" 
-             class="px-3 py-2 rounded bg-gray-700 border border-gray-600 
-                    placeholder-gray-500 focus:outline-none focus:ring-2 
-                    focus:ring-indigo-500 text-gray-200" 
-             placeholder="Player ${i} name" ${i===1 ? "autofocus" : ""}/>
+      <label for="P${i}" class="text-sm text-gray-300 mb-1 select-none">
+        P${i} ${i === 1 ? "(You)" : ""}
+      </label>
+      <input id="P${i}" type="text"
+             class="px-3 py-2 rounded bg-gray-700 border border-gray-600
+                    placeholder-gray-500 focus:outline-none focus:ring-2
+                    focus:ring-indigo-500 text-gray-200"
+             placeholder="Player ${i} name" ${i === 1 ? "autofocus" : ""}/>
     `;
     cont.appendChild(wrapper);
   }
@@ -33,7 +35,7 @@ document.getElementById("btnClear").addEventListener("click", () => {
 function generateDropdowns() {
   players = [];
   for (let i = 1; i <= 8; i++) {
-    const v = document.getElementById("P"+i).value.trim();
+    const v = document.getElementById("P" + i).value.trim();
     if (!v) { alert("Semua nama pemain (P1–P8) harus diisi."); return; }
     players.push(v);
   }
@@ -95,17 +97,19 @@ function updateDropdowns() {
     const opts = ["<option value=''>-- pilih lawan --</option>"]
       .concat(
         players.filter(p => p !== players[0] && (!used.includes(p) || p === current))
-               .map(p => `<option value="${escapeHtml(p)}" ${p===current?"selected":""}>${escapeHtml(p)}</option>`)
+               .map(p => `<option value="${escapeHtml(p)}" ${p === current ? "selected" : ""}>${escapeHtml(p)}</option>`)
       ).join("");
     sel.innerHTML = opts;
   });
 }
 
 function escapeHtml(s) {
-  return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  return String(s).replaceAll("&","&amp;")
+                  .replaceAll("<","&lt;")
+                  .replaceAll(">","&gt;");
 }
 
-// ---------- Solve (frontend version tanpa PHP) ----------
+// ---------- Solve ----------
 document.getElementById("btnSolve").addEventListener("click", solve);
 
 function solve() {
@@ -117,31 +121,33 @@ function solve() {
   // Ambil players
   const players = [];
   for (let i = 1; i <= 8; i++) {
-    const v = document.getElementById("P"+i).value.trim();
+    const v = document.getElementById("P" + i).value.trim();
     if (!v) { alert("Semua nama pemain (P1–P8) harus diisi."); return; }
     players.push(v);
   }
 
   // Ambil pilihan dari dropdown
   const selects = Array.from(document.querySelectorAll("#rounds select"))
-                       .sort((a,b) => Number(a.dataset.index) - Number(b.dataset.index));
+                       .sort((a, b) => Number(a.dataset.index) - Number(b.dataset.index));
   const chosen = selects.map(s => s.value).filter(v => v);
 
-  if (chosen.length < 5) { 
-    alert("Isi semua 5 ronde terlebih dahulu."); 
-    return; 
+  if (chosen.length < 5) {
+    alert("Isi semua 5 ronde terlebih dahulu.");
+    return;
   }
 
-  // Label ronde penuh (12 slot, ikut format asal)
+  // Label ronde penuh (12 slot)
   const titles = ["II-4","II-5","II-6","III-1","III-2","III-4","III-5","III-6","IV-1","IV-2","IV-4","IV-5"];
 
   // Cari lawan yang belum dipilih
   const remaining = players.filter(p => p !== players[0] && !chosen.includes(p));
 
-  // Sediakan dua versi baki
-  let remaining1 = [...remaining];          // sequential
-  let remaining2 = [...remaining].reverse(); // reverse
+  if (remaining.length !== (titles.length - chosen.length)) {
+    alert("Data tidak konsisten. Sisa lawan tak cukup.");
+    return;
+  }
 
+  // Buat 2 kemungkinan (rotate remaining)
   let seq1 = [];
   let seq2 = [];
 
@@ -150,13 +156,12 @@ function solve() {
       seq1.push(`${title} : ${chosen[idx]}`);
       seq2.push(`${title} : ${chosen[idx]}`);
     } else {
-      const r1 = remaining1.shift() || "??";
-      const r2 = remaining2.shift() || "??";
-      seq1.push(`${title} : ${r1}`);
-      seq2.push(`${title} : ${r2}`);
+      seq1.push(`${title} : ${remaining[(idx - chosen.length) % remaining.length]}`);
+      seq2.push(`${title} : ${remaining[(idx - chosen.length + 1) % remaining.length]}`);
     }
   });
 
+  // Tampilkan hasil
   const card = (title, seq) => {
     const div = document.createElement("div");
     div.className = "bg-gray-900 rounded p-4 border border-gray-700";
@@ -166,8 +171,7 @@ function solve() {
     const pre = document.createElement("pre");
     pre.className = "text-green-400 whitespace-pre-wrap font-mono text-sm";
     pre.textContent = seq.join("\n");
-    div.appendChild(h);
-    div.appendChild(pre);
+    div.appendChild(h); div.appendChild(pre);
     return div;
   };
 
