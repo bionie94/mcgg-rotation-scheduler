@@ -7,13 +7,13 @@ window.onload = () => {
     wrapper.className = "flex flex-col";
     wrapper.innerHTML = `
       <label for="P${i}" class="text-sm text-gray-300 mb-1 select-none">
-        P${i} ${i === 1 ? "(You)" : ""}
+        P${i} ${i===1 ? "(You)" : ""}
       </label>
       <input id="P${i}" type="text"
              class="px-3 py-2 rounded bg-gray-700 border border-gray-600
                     placeholder-gray-500 focus:outline-none focus:ring-2
                     focus:ring-indigo-500 text-gray-200"
-             placeholder="Player ${i} name" ${i === 1 ? "autofocus" : ""}/>
+             placeholder="Player ${i} name" ${i===1 ? "autofocus" : ""}/>
     `;
     cont.appendChild(wrapper);
   }
@@ -97,16 +97,14 @@ function updateDropdowns() {
     const opts = ["<option value=''>-- pilih lawan --</option>"]
       .concat(
         players.filter(p => p !== players[0] && (!used.includes(p) || p === current))
-               .map(p => `<option value="${escapeHtml(p)}" ${p === current ? "selected" : ""}>${escapeHtml(p)}</option>`)
+               .map(p => `<option value="${escapeHtml(p)}" ${p===current?"selected":""}>${escapeHtml(p)}</option>`)
       ).join("");
     sel.innerHTML = opts;
   });
 }
 
 function escapeHtml(s) {
-  return String(s).replaceAll("&","&amp;")
-                  .replaceAll("<","&lt;")
-                  .replaceAll(">","&gt;");
+  return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
 }
 
 // ---------- Solve ----------
@@ -118,7 +116,7 @@ function solve() {
   output.innerHTML = "";
   outputSection.classList.add("hidden");
 
-  // Ambil players
+  // Ambil players dari input P1..P8
   const players = [];
   for (let i = 1; i <= 8; i++) {
     const v = document.getElementById("P" + i).value.trim();
@@ -126,42 +124,43 @@ function solve() {
     players.push(v);
   }
 
-  // Ambil pilihan dari dropdown
+  // Ambil chosen dari select (urutkan berdasarkan data-index)
   const selects = Array.from(document.querySelectorAll("#rounds select"))
                        .sort((a, b) => Number(a.dataset.index) - Number(b.dataset.index));
   const chosen = selects.map(s => s.value).filter(v => v);
 
-  if (chosen.length < 5) {
-    alert("Isi semua 5 ronde terlebih dahulu.");
-    return;
+  if (chosen.length < 5) { 
+    alert("Isi semua 5 ronde terlebih dahulu."); 
+    return; 
   }
 
-  // Label ronde penuh (12 slot)
+  // Semua ronde penuh
   const titles = ["II-4","II-5","II-6","III-1","III-2","III-4","III-5","III-6","IV-1","IV-2","IV-4","IV-5"];
 
   // Cari lawan yang belum dipilih
   const remaining = players.filter(p => p !== players[0] && !chosen.includes(p));
 
-  if (remaining.length !== (titles.length - chosen.length)) {
-    alert("Data tidak konsisten. Sisa lawan tak cukup.");
+  if (remaining.length !== 2) {
+    alert("Data tidak konsisten. Sisa lawan mesti tinggal 2 pemain.");
     return;
   }
 
-  // Buat 2 kemungkinan (rotate remaining)
+  // Masukkan chosen dulu
   let seq1 = [];
   let seq2 = [];
-
-  titles.forEach((title, idx) => {
-    if (idx < chosen.length) {
-      seq1.push(`${title} : ${chosen[idx]}`);
-      seq2.push(`${title} : ${chosen[idx]}`);
-    } else {
-      seq1.push(`${title} : ${remaining[(idx - chosen.length) % remaining.length]}`);
-      seq2.push(`${title} : ${remaining[(idx - chosen.length + 1) % remaining.length]}`);
-    }
+  chosen.forEach((c, idx) => {
+    seq1.push(`${titles[idx]} : ${c}`);
+    seq2.push(`${titles[idx]} : ${c}`);
   });
 
-  // Tampilkan hasil
+  // Tambah baki ke 2 kemungkinan
+  seq1.push(`${titles[chosen.length]} : ${remaining[0]}`);
+  seq1.push(`${titles[chosen.length+1]} : ${remaining[1]}`);
+
+  seq2.push(`${titles[chosen.length]} : ${remaining[1]}`);
+  seq2.push(`${titles[chosen.length+1]} : ${remaining[0]}`);
+
+  // Render output
   const card = (title, seq) => {
     const div = document.createElement("div");
     div.className = "bg-gray-900 rounded p-4 border border-gray-700";
@@ -171,12 +170,13 @@ function solve() {
     const pre = document.createElement("pre");
     pre.className = "text-green-400 whitespace-pre-wrap font-mono text-sm";
     pre.textContent = seq.join("\n");
-    div.appendChild(h); div.appendChild(pre);
+    div.appendChild(h); 
+    div.appendChild(pre);
     return div;
   };
 
   output.appendChild(card("Kemungkinan 1", seq1));
   output.appendChild(card("Kemungkinan 2", seq2));
   outputSection.classList.remove("hidden");
-  output.scrollIntoView({ behavior: "smooth", block: "center" });
+  output.scrollIntoView({ behavior:"smooth", block:"center" });
 }
