@@ -4,8 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Magic Chess : GO GO Predict</title>
+  <meta name="description" content="Magic Chess : GO GO Predict untuk prediksi lawan berikutnya di game MCGOGO.">
+  <meta name="keywords" content="login mcgogo, magic chess login, mcgogo predict login">
+  <link rel="canonical" href="https://mcgogopredict.com/" />
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/814/814513.png" type="image/png">
 
-  <!-- Tailwind -->
+  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -20,17 +24,13 @@
     }
   </script>
   <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
-
-  <!-- Script dengan defer -->
-  <script src="script.js" defer></script>
 </head>
-
 <body class="bg-gray-900 text-gray-100 min-h-screen flex items-start justify-center p-6 font-sans">
 
   <main class="w-full max-w-4xl space-y-8">
 
     <!-- Header -->
-    <header class="text-center">
+    <header class="relative text-center">
       <h1 class="text-3xl font-extrabold text-indigo-400 mb-1">⚔️ Magic Chess : GO GO Predict</h1>
       <p class="text-gray-400">Masukkan 8 nama pemain (P1 = Kamu).</p>
     </header>
@@ -40,12 +40,8 @@
       <h2 class="text-lg font-semibold text-indigo-300 mb-3">👥 Player Names</h2>
       <div id="playerInputs" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
       <div class="mt-5 flex gap-3">
-        <button id="btnGenerate" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md shadow text-white font-semibold transition">
-          🎮 Generate Rounds
-        </button>
-        <button id="btnClear" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md shadow text-gray-200 transition">
-          🧹 Reset Inputs
-        </button>
+        <button id="btnGenerate" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md shadow text-white font-semibold transition">🎮 Generate Rounds</button>
+        <button id="btnClear" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md shadow text-gray-200 transition">🧹 Reset Inputs</button>
       </div>
     </section>
 
@@ -54,9 +50,7 @@
       <h2 class="text-lg font-semibold text-indigo-300 mb-4">📅 Isi Lawan (Round)</h2>
       <div id="rounds" class="flex flex-col gap-3"></div>
       <div class="mt-6">
-        <button id="btnSolve" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-md shadow text-white font-semibold transition">
-          🚀 Find Opponent Sequence
-        </button>
+        <button id="btnSolve" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-md shadow text-white font-semibold transition">🚀 Find Opponent Sequence</button>
       </div>
     </section>
 
@@ -69,5 +63,7 @@
 
   </main>
 
+  <!-- Link ke script kita -->
+  <script src="script.js"></script>
 </body>
 </html>
