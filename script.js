@@ -152,4 +152,28 @@ function solve() {
       seq1.push(`${title} : ${chosen[idx]}`);
       seq2.push(`${title} : ${chosen[idx]}`);
     } else {
-      s
+      seq1.push(`${title} : ${remaining[idx - chosen.length]}`);
+      seq2.push(`${title} : ${remaining[remaining.length - 1 - (idx - chosen.length)]}`);
+    }
+  });
+
+  // Render output
+  const card = (title, seq) => {
+    const div = document.createElement("div");
+    div.className = "bg-gray-900 rounded p-4 border border-gray-700";
+    const h = document.createElement("h3");
+    h.className = "text-indigo-300 font-semibold mb-2";
+    h.textContent = title;
+    const pre = document.createElement("pre");
+    pre.className = "text-green-400 whitespace-pre-wrap font-mono text-sm";
+    pre.textContent = seq.join("\n");
+    div.appendChild(h); 
+    div.appendChild(pre);
+    return div;
+  };
+
+  output.appendChild(card("Kemungkinan 1", seq1));
+  output.appendChild(card("Kemungkinan 2", seq2));
+  outputSection.classList.remove("hidden");
+  output.scrollIntoView({behavior:"smooth", block:"center"});
+}
