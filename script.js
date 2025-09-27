@@ -9,10 +9,10 @@ window.onload = () => {
       <label for="P${i}" class="text-sm text-gray-300 mb-1 select-none">
         P${i} ${i===1 ? "(You)" : ""}
       </label>
-      <input id="P${i}" type="text"
-             class="px-3 py-2 rounded bg-gray-700 border border-gray-600
-                    placeholder-gray-500 focus:outline-none focus:ring-2
-                    focus:ring-indigo-500 text-gray-200"
+      <input id="P${i}" type="text" 
+             class="px-3 py-2 rounded bg-gray-700 border border-gray-600 
+                    placeholder-gray-500 focus:outline-none focus:ring-2 
+                    focus:ring-indigo-500 text-gray-200" 
              placeholder="Player ${i} name" ${i===1 ? "autofocus" : ""}/>
     `;
     cont.appendChild(wrapper);
@@ -35,7 +35,7 @@ document.getElementById("btnClear").addEventListener("click", () => {
 function generateDropdowns() {
   players = [];
   for (let i = 1; i <= 8; i++) {
-    const v = document.getElementById("P" + i).value.trim();
+    const v = document.getElementById("P"+i).value.trim();
     if (!v) { alert("Semua nama pemain (P1–P8) harus diisi."); return; }
     players.push(v);
   }
@@ -116,17 +116,17 @@ function solve() {
   output.innerHTML = "";
   outputSection.classList.add("hidden");
 
-  // Ambil players dari input P1..P8
+  // Ambil players
   const players = [];
   for (let i = 1; i <= 8; i++) {
-    const v = document.getElementById("P" + i).value.trim();
+    const v = document.getElementById("P"+i).value.trim();
     if (!v) { alert("Semua nama pemain (P1–P8) harus diisi."); return; }
     players.push(v);
   }
 
-  // Ambil chosen dari select (urutkan berdasarkan data-index)
+  // Ambil pilihan dari dropdown
   const selects = Array.from(document.querySelectorAll("#rounds select"))
-                       .sort((a, b) => Number(a.dataset.index) - Number(b.dataset.index));
+                       .sort((a,b) => Number(a.dataset.index) - Number(b.dataset.index));
   const chosen = selects.map(s => s.value).filter(v => v);
 
   if (chosen.length < 5) { 
@@ -134,33 +134,31 @@ function solve() {
     return; 
   }
 
-  // Semua ronde penuh
+  // Label ronde penuh (12 slot)
   const titles = ["II-4","II-5","II-6","III-1","III-2","III-4","III-5","III-6","IV-1","IV-2","IV-4","IV-5"];
 
-  // Cari lawan yang belum dipilih
+  // cari semua lawan yang tinggal
   const remaining = players.filter(p => p !== players[0] && !chosen.includes(p));
 
-  if (remaining.length !== 2) {
-    alert("Data tidak konsisten. Sisa lawan mesti tinggal 2 pemain.");
+  if (remaining.length + chosen.length !== titles.length) {
+    alert("Data tidak konsisten. Sisa lawan tak cukup.");
     return;
   }
 
-  // Masukkan chosen dulu
-  let seq1 = [];
-  let seq2 = [];
-  chosen.forEach((c, idx) => {
-    seq1.push(`${titles[idx]} : ${c}`);
-    seq2.push(`${titles[idx]} : ${c}`);
+  // buat dua kemungkinan
+  const seq1 = [];
+  const seq2 = [];
+
+  titles.forEach((title, idx) => {
+    if (idx < chosen.length) {
+      seq1.push(`${title} : ${chosen[idx]}`);
+      seq2.push(`${title} : ${chosen[idx]}`);
+    } else {
+      seq1.push(`${title} : ${remaining[(idx - chosen.length) % remaining.length]}`);
+      seq2.push(`${title} : ${remaining[(remaining.length - 1 - ((idx - chosen.length) % remaining.length))]}`);
+    }
   });
 
-  // Tambah baki ke 2 kemungkinan
-  seq1.push(`${titles[chosen.length]} : ${remaining[0]}`);
-  seq1.push(`${titles[chosen.length+1]} : ${remaining[1]}`);
-
-  seq2.push(`${titles[chosen.length]} : ${remaining[1]}`);
-  seq2.push(`${titles[chosen.length+1]} : ${remaining[0]}`);
-
-  // Render output
   const card = (title, seq) => {
     const div = document.createElement("div");
     div.className = "bg-gray-900 rounded p-4 border border-gray-700";
@@ -170,13 +168,12 @@ function solve() {
     const pre = document.createElement("pre");
     pre.className = "text-green-400 whitespace-pre-wrap font-mono text-sm";
     pre.textContent = seq.join("\n");
-    div.appendChild(h); 
-    div.appendChild(pre);
+    div.appendChild(h); div.appendChild(pre);
     return div;
   };
 
   output.appendChild(card("Kemungkinan 1", seq1));
   output.appendChild(card("Kemungkinan 2", seq2));
   outputSection.classList.remove("hidden");
-  output.scrollIntoView({ behavior:"smooth", block:"center" });
+  output.scrollIntoView({behavior:"smooth", block:"center"});
 }
