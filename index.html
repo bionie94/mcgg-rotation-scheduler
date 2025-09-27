@@ -6,52 +6,59 @@
   <title>Magic Chess : GO GO Predict</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center py-8">
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center py-6">
 
   <!-- Title -->
-  <h1 class="text-3xl font-bold text-indigo-400 mb-2">🪄 Magic Chess : GO GO Predict</h1>
+  <h1 class="text-3xl font-bold mb-2">
+    <span class="bg-gradient-to-r from-pink-500 via-purple-400 to-blue-400 bg-clip-text text-transparent">
+      ⚔ Magic Chess : GO GO Predict
+    </span>
+  </h1>
   <p class="mb-6 text-gray-400">Masukkan 8 nama pemain (P1 = Kamu).</p>
 
   <!-- Player Names -->
-  <div id="playerInputs" class="grid grid-cols-4 gap-4 bg-gray-800 p-6 rounded-lg shadow-md w-full max-w-3xl">
-    <h2 class="col-span-4 text-lg font-semibold text-indigo-300 mb-2">👥 Player Names</h2>
+  <div class="bg-gray-800 p-6 rounded-xl shadow-lg w-full max-w-3xl mb-6">
+    <h2 class="text-xl font-semibold text-indigo-300 mb-4">👥 Player Names</h2>
+    <div id="playerInputs" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+    <div class="flex gap-3 mt-4">
+      <button id="btnGenerate" class="px-4 py-2 bg-indigo-600 rounded hover:bg-indigo-700 transition flex items-center gap-2">
+        🎮 Generate Rounds
+      </button>
+      <button id="btnClear" class="px-4 py-2 bg-gray-600 rounded hover:bg-gray-700 transition flex items-center gap-2">
+        🧹 Reset Inputs
+      </button>
+    </div>
   </div>
 
-  <!-- Buttons -->
-  <div class="flex gap-4 mt-4">
-    <button id="btnGenerate" class="px-4 py-2 rounded bg-indigo-600 hover:bg-indigo-700 font-medium">🎮 Generate Rounds</button>
-    <button id="btnClear" class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 font-medium">🧹 Reset Inputs</button>
-  </div>
-
-  <!-- Rounds Form -->
-  <div id="roundsForm" class="hidden mt-8 w-full max-w-2xl">
-    <h2 class="text-lg font-semibold text-indigo-300 mb-2">📑 Isi Lawan (Round)</h2>
+  <!-- Isi Lawan -->
+  <div id="roundsForm" class="hidden bg-gray-800 p-6 rounded-xl shadow-lg w-full max-w-3xl mb-6">
+    <h2 class="text-xl font-semibold text-indigo-300 mb-4">📑 Isi Lawan (Round)</h2>
     <div id="rounds" class="flex flex-col gap-3"></div>
-    <button id="btnSolve" class="mt-4 px-4 py-2 rounded bg-green-600 hover:bg-green-700 font-medium">🚀 Find Opponent Sequence</button>
+    <button id="btnSolve" class="mt-4 px-4 py-2 bg-green-600 rounded hover:bg-green-700 transition flex items-center gap-2">
+      🚀 Find Opponent Sequence
+    </button>
   </div>
 
-  <!-- Output Section -->
-  <div id="outputSection" class="hidden mt-8 w-full max-w-3xl">
-    <h2 class="text-lg font-semibold text-indigo-300 mb-2">📄 Hasil Prediksi</h2>
-    <div id="output" class="grid grid-cols-2 gap-4"></div>
-    <p class="mt-2 text-gray-400 text-sm">Format: Kemungkinan 1 (kiri) dan Kemungkinan 2 (kanan).</p>
+  <!-- Hasil Prediksi -->
+  <div id="outputSection" class="hidden bg-gray-800 p-6 rounded-xl shadow-lg w-full max-w-5xl">
+    <h2 class="text-xl font-semibold text-indigo-300 mb-4">📋 Hasil Prediksi</h2>
+    <div id="output" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    <p class="mt-4 text-gray-400 text-sm">Format: Kemungkinan 1 (kiri) dan Kemungkinan 2 (kanan).</p>
   </div>
 
-  <!-- Script -->
   <script>
-    // ---------- UI Input Player (2x4 grid) ----------
+    // ---------- Init UI ----------
     window.onload = () => {
       const cont = document.getElementById("playerInputs");
-      cont.innerHTML = '<h2 class="col-span-4 text-lg font-semibold text-indigo-300 mb-2">👥 Player Names</h2>';
+      cont.innerHTML = "";
       for (let i = 1; i <= 8; i++) {
         const wrapper = document.createElement("div");
         wrapper.className = "flex flex-col";
         wrapper.innerHTML = `
           <label for="P${i}" class="text-sm text-gray-300 mb-1 select-none">P${i} ${i===1 ? "(You)" : ""}</label>
           <input id="P${i}" type="text"
-                 class="px-3 py-2 rounded bg-gray-700 border border-gray-600 
-                        placeholder-gray-500 focus:outline-none focus:ring-2 
-                        focus:ring-indigo-500 text-gray-200"
+                 class="px-3 py-2 rounded bg-gray-700 border border-gray-600 placeholder-gray-500
+                        focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-200"
                  placeholder="Player ${i} name"/>
         `;
         cont.appendChild(wrapper);
@@ -68,11 +75,11 @@
       window.onload();
     });
 
-    // ---------- Generate Rounds ----------
+    // ---------- Generate dropdown ----------
     function generateDropdowns() {
       players = [];
       for (let i = 1; i <= 8; i++) {
-        const v = document.getElementById("P" + i).value.trim();
+        const v = document.getElementById("P"+i).value.trim();
         if (!v) { alert("Semua nama pemain (P1–P8) harus diisi."); return; }
         players.push(v);
       }
@@ -124,7 +131,6 @@
       document.getElementById("outputSection").classList.add("hidden");
     }
 
-    // update dropdown
     function updateDropdowns() {
       const selects = Array.from(document.querySelectorAll("#rounds select"));
       const used = selects.map(s => s.value).filter(v => v);
@@ -144,7 +150,7 @@
       return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
     }
 
-    // ---------- Solve (dummy generate) ----------
+    // ---------- Solve ----------
     document.getElementById("btnSolve").addEventListener("click", solve);
 
     function solve() {
@@ -160,30 +166,31 @@
         players.push(v);
       }
 
-      // ambil pilihan dropdown
       const selects = Array.from(document.querySelectorAll("#rounds select"))
                            .sort((a,b) => Number(a.dataset.index) - Number(b.dataset.index));
       const chosen = selects.map(s => s.value).filter(v => v);
 
-      if (chosen.length < 5) {
-        alert("Isi semua 5 ronde terlebih dahulu.");
-        return;
-      }
+      if (chosen.length < 5) { alert("Isi semua 5 ronde terlebih dahulu."); return; }
 
-      // dummy titles
       const titles = ["II-4","II-5","II-6","III-1","III-2","III-4","III-5","III-6","IV-1","IV-2","IV-4","IV-5"];
+      const remaining = players.filter(p => p !== players[0] && !chosen.includes(p));
 
-      // --- buat 2 kemungkinan dummy (random shuffle) ---
-      function shuffle(arr) {
-        return arr.map(x => [Math.random(), x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
-      }
+      let seq1 = [], seq2 = [];
 
-      const remaining = players.filter(p => p !== players[0]);
-      const shuffled1 = shuffle(remaining).slice(0, titles.length);
-      const shuffled2 = shuffle(remaining).slice(0, titles.length);
+      let pool1 = remaining;
+      let pool2 = [...remaining].reverse();
 
-      const seq1 = titles.map((t,i)=>`${t} : ${shuffled1[i]}`);
-      const seq2 = titles.map((t,i)=>`${t} : ${shuffled2[i]}`);
+      titles.forEach((title, idx) => {
+        if (idx < chosen.length) {
+          seq1.push(`${title} : ${chosen[idx]}`);
+          seq2.push(`${title} : ${chosen[idx]}`);
+        } else {
+          let r1 = pool1[(idx - chosen.length) % pool1.length];
+          let r2 = pool2[(idx - chosen.length) % pool2.length];
+          seq1.push(`${title} : ${r1}`);
+          seq2.push(`${title} : ${r2}`);
+        }
+      });
 
       const card = (title, seq) => {
         const div = document.createElement("div");
