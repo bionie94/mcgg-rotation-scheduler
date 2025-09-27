@@ -6,9 +6,7 @@ window.onload = () => {
     const wrapper = document.createElement("div");
     wrapper.className = "flex flex-col";
     wrapper.innerHTML = `
-      <label for="P${i}" class="text-sm text-gray-300 mb-1 select-none">
-        P${i} ${i===1 ? "(You)" : ""}
-      </label>
+      <label for="P${i}" class="text-sm text-gray-300 mb-1 select-none">P${i} ${i===1 ? "(You)" : ""}</label>
       <input id="P${i}" type="text" 
              class="px-3 py-2 rounded bg-gray-700 border border-gray-600 
                     placeholder-gray-500 focus:outline-none focus:ring-2 
@@ -107,7 +105,7 @@ function escapeHtml(s) {
   return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
 }
 
-// ---------- Solve ----------
+// ---------- Solve tanpa PHP ----------
 document.getElementById("btnSolve").addEventListener("click", solve);
 
 function solve() {
@@ -124,7 +122,7 @@ function solve() {
     players.push(v);
   }
 
-  // Ambil pilihan dari dropdown
+  // Ambil pilihan dari dropdown (5 ronde)
   const selects = Array.from(document.querySelectorAll("#rounds select"))
                        .sort((a,b) => Number(a.dataset.index) - Number(b.dataset.index));
   const chosen = selects.map(s => s.value).filter(v => v);
@@ -137,28 +135,21 @@ function solve() {
   // Label ronde penuh (12 slot)
   const titles = ["II-4","II-5","II-6","III-1","III-2","III-4","III-5","III-6","IV-1","IV-2","IV-4","IV-5"];
 
-  // cari semua lawan yang tinggal
+  // Cari lawan yang belum dipilih
   const remaining = players.filter(p => p !== players[0] && !chosen.includes(p));
 
-  if (remaining.length + chosen.length !== titles.length) {
+  if (remaining.length !== (titles.length - chosen.length)) {
     alert("Data tidak konsisten. Sisa lawan tak cukup.");
     return;
   }
 
-  // buat dua kemungkinan
-  const seq1 = [];
-  const seq2 = [];
+  // Kemungkinan 1: urutan asal
+  const seq1 = [...chosen, ...remaining].map((p, idx) => `${titles[idx]} : ${p}`);
 
-  titles.forEach((title, idx) => {
-    if (idx < chosen.length) {
-      seq1.push(`${title} : ${chosen[idx]}`);
-      seq2.push(`${title} : ${chosen[idx]}`);
-    } else {
-      seq1.push(`${title} : ${remaining[(idx - chosen.length) % remaining.length]}`);
-      seq2.push(`${title} : ${remaining[(remaining.length - 1 - ((idx - chosen.length) % remaining.length))]}`);
-    }
-  });
+  // Kemungkinan 2: chosen sama, baki dibalik (reverse)
+  const seq2 = [...chosen, ...remaining.slice().reverse()].map((p, idx) => `${titles[idx]} : ${p}`);
 
+  // Papar result
   const card = (title, seq) => {
     const div = document.createElement("div");
     div.className = "bg-gray-900 rounded p-4 border border-gray-700";
@@ -168,7 +159,8 @@ function solve() {
     const pre = document.createElement("pre");
     pre.className = "text-green-400 whitespace-pre-wrap font-mono text-sm";
     pre.textContent = seq.join("\n");
-    div.appendChild(h); div.appendChild(pre);
+    div.appendChild(h); 
+    div.appendChild(pre);
     return div;
   };
 
