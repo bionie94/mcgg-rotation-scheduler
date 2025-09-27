@@ -7,7 +7,11 @@ window.onload = () => {
     wrapper.className = "flex flex-col";
     wrapper.innerHTML = `
       <label for="P${i}" class="text-sm text-gray-300 mb-1 select-none">P${i} ${i===1 ? "(You)" : ""}</label>
-      <input id="P${i}" type="text" class="px-3 py-2 rounded bg-gray-700 border border-gray-600 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-200" placeholder="Player ${i} name" ${i===1 ? "autofocus" : ""}/>
+      <input id="P${i}" type="text" 
+             class="px-3 py-2 rounded bg-gray-700 border border-gray-600 
+                    placeholder-gray-500 focus:outline-none focus:ring-2 
+                    focus:ring-indigo-500 text-gray-200" 
+             placeholder="Player ${i} name" ${i===1 ? "autofocus" : ""}/>
     `;
     cont.appendChild(wrapper);
   }
@@ -101,7 +105,7 @@ function escapeHtml(s) {
   return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
 }
 
-// ---------- Solve tanpa PHP (versi ikut website asal) ----------
+// ---------- Solve tanpa PHP (ikut format asal) ----------
 document.getElementById("btnSolve").addEventListener("click", solve);
 
 function solve() {
@@ -128,32 +132,24 @@ function solve() {
     return; 
   }
 
-  // Semua label ronde asal
+  // Label ronde penuh (12 slot)
   const titles = ["II-4","II-5","II-6","III-1","III-2","III-4","III-5","III-6","IV-1","IV-2","IV-4","IV-5"];
 
   // Cari lawan yang belum dipilih
   const remaining = players.filter(p => p !== players[0] && !chosen.includes(p));
 
-  // Bina kemungkinan
-  const seq1 = [...chosen, ...remaining];
-  const seq2 = [...chosen, ...remaining.reverse()];
+  if (remaining.length !== (titles.length - chosen.length)) {
+    alert("Data tidak konsisten. Sisa lawan tak cukup.");
+    return;
+  }
 
-  const card = (title, seq) => {
-    const div = document.createElement("div");
-    div.className = "bg-gray-900 rounded p-4 border border-gray-700";
-    const h = document.createElement("h3");
-    h.className = "text-indigo-300 font-semibold mb-2";
-    h.textContent = title;
-    const pre = document.createElement("pre");
-    pre.className = "text-green-400 whitespace-pre-wrap font-mono text-sm";
-    pre.textContent = seq.map((p,i)=>`${titles[i]} : ${p}`).join("\n");
-    div.appendChild(h); 
-    div.appendChild(pre);
-    return div;
-  };
+  // Padankan chosen ke slot awal + sisanya diisi
+  let seq1 = [];
+  let seq2 = [];
 
-  output.appendChild(card("Kemungkinan 1", seq1));
-  output.appendChild(card("Kemungkinan 2", seq2));
-  outputSection.classList.remove("hidden");
-  output.scrollIntoView({behavior:"smooth", block:"center"});
-}
+  titles.forEach((title, idx) => {
+    if (idx < chosen.length) {
+      seq1.push(`${title} : ${chosen[idx]}`);
+      seq2.push(`${title} : ${chosen[idx]}`);
+    } else {
+      s
