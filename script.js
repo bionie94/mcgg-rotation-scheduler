@@ -105,7 +105,7 @@ function escapeHtml(s) {
   return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
 }
 
-// ---------- Solve tanpa PHP (ikut format asal) ----------
+// ---------- Solve (frontend version tanpa PHP) ----------
 document.getElementById("btnSolve").addEventListener("click", solve);
 
 function solve() {
@@ -132,18 +132,16 @@ function solve() {
     return; 
   }
 
-  // Label ronde penuh (12 slot)
+  // Label ronde penuh (12 slot, ikut format asal)
   const titles = ["II-4","II-5","II-6","III-1","III-2","III-4","III-5","III-6","IV-1","IV-2","IV-4","IV-5"];
 
   // Cari lawan yang belum dipilih
   const remaining = players.filter(p => p !== players[0] && !chosen.includes(p));
 
-  if (remaining.length !== (titles.length - chosen.length)) {
-    alert("Data tidak konsisten. Sisa lawan tak cukup.");
-    return;
-  }
+  // Sediakan dua versi baki
+  let remaining1 = [...remaining];          // sequential
+  let remaining2 = [...remaining].reverse(); // reverse
 
-  // Padankan chosen ke slot awal + sisanya diisi
   let seq1 = [];
   let seq2 = [];
 
@@ -152,12 +150,13 @@ function solve() {
       seq1.push(`${title} : ${chosen[idx]}`);
       seq2.push(`${title} : ${chosen[idx]}`);
     } else {
-      seq1.push(`${title} : ${remaining[idx - chosen.length]}`);
-      seq2.push(`${title} : ${remaining[remaining.length - 1 - (idx - chosen.length)]}`);
+      const r1 = remaining1.shift() || "??";
+      const r2 = remaining2.shift() || "??";
+      seq1.push(`${title} : ${r1}`);
+      seq2.push(`${title} : ${r2}`);
     }
   });
 
-  // Render output
   const card = (title, seq) => {
     const div = document.createElement("div");
     div.className = "bg-gray-900 rounded p-4 border border-gray-700";
@@ -167,7 +166,7 @@ function solve() {
     const pre = document.createElement("pre");
     pre.className = "text-green-400 whitespace-pre-wrap font-mono text-sm";
     pre.textContent = seq.join("\n");
-    div.appendChild(h); 
+    div.appendChild(h);
     div.appendChild(pre);
     return div;
   };
@@ -175,5 +174,5 @@ function solve() {
   output.appendChild(card("Kemungkinan 1", seq1));
   output.appendChild(card("Kemungkinan 2", seq2));
   outputSection.classList.remove("hidden");
-  output.scrollIntoView({behavior:"smooth", block:"center"});
+  output.scrollIntoView({ behavior: "smooth", block: "center" });
 }
