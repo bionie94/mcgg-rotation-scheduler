@@ -1,44 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Magic Chess : GO GO Predict</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center py-6">
-  <h1 class="text-3xl font-bold mb-2">
-    ✨ <span class="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
-      Magic Chess : GO GO Predict
-    </span>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-6">
+
+  <!-- Title -->
+  <h1 class="text-2xl font-bold mb-6">
+    ✨ <span class="text-pink-400">Magic Chess</span> : 
+    <span class="text-purple-400">GO GO Predict</span>
   </h1>
-  <p class="mb-6 text-gray-400">Masukkan 8 nama pemain (P1 = Kamu).</p>
+  <p class="mb-4 text-gray-300 text-sm">Masukkan 8 nama pemain (P1 = Kamu).</p>
 
   <!-- Player Inputs -->
   <div id="playerInputs" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
 
-  <div class="flex gap-4 mb-6">
-    <button id="btnGenerate" class="px-4 py-2 rounded bg-indigo-600 hover:bg-indigo-700">🎮 Generate Rounds</button>
+  <!-- Buttons -->
+  <div class="flex gap-3 mb-6">
+    <button id="btnGenerate" class="px-4 py-2 rounded bg-indigo-600 hover:bg-indigo-700 font-semibold flex items-center gap-2">
+      🎮 Generate Rounds
+    </button>
     <button id="btnClear" class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700">🧹 Reset Inputs</button>
   </div>
 
-  <!-- Rounds -->
-  <form id="roundsForm" class="hidden w-full max-w-xl mx-auto mb-6">
-    <h2 class="text-lg font-semibold mb-2">📝 Isi Lawan (Round)</h2>
-    <div id="rounds" class="flex flex-col gap-2"></div>
-    <button id="btnSolve" type="button" class="mt-4 px-4 py-2 rounded bg-green-600 hover:bg-green-700">
+  <!-- Isi Lawan -->
+  <div id="roundsForm" class="hidden w-full max-w-xl mb-6">
+    <h2 class="text-lg font-semibold mb-3">📋 Isi Lawan (Round)</h2>
+    <div id="rounds" class="flex flex-col gap-3"></div>
+    <button id="btnSolve" class="mt-4 px-4 py-2 rounded bg-green-600 hover:bg-green-700 font-semibold flex items-center gap-2">
       🚀 Find Opponent Sequence
     </button>
-  </form>
+  </div>
 
-  <!-- Output -->
-  <div id="outputSection" class="hidden w-full max-w-4xl mx-auto">
-    <h2 class="text-lg font-semibold mb-2">📄 Hasil Prediksi</h2>
-    <div id="output" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-    <p class="text-sm text-gray-400 mt-2">Format: Kemungkinan 1 (kiri) dan Kemungkinan 2 (kanan).</p>
+  <!-- Hasil Prediksi -->
+  <div id="outputSection" class="hidden w-full max-w-2xl">
+    <h2 class="text-lg font-semibold mb-3">📘 Hasil Prediksi</h2>
+    <div id="output" class="grid md:grid-cols-2 gap-4"></div>
+    <p class="text-xs text-gray-400 mt-3">Format: Kemungkinan 1 (kiri) dan Kemungkinan 2 (kanan).</p>
   </div>
 
 <script>
+// ---------- Inisialisasi UI ----------
 window.onload = () => {
   const cont = document.getElementById("playerInputs");
   cont.innerHTML = "";
@@ -47,25 +52,35 @@ window.onload = () => {
     wrapper.className = "flex flex-col";
     wrapper.innerHTML = `
       <label for="P${i}" class="text-sm text-gray-300 mb-1 select-none">P${i} ${i===1 ? "(You)" : ""}</label>
-      <input id="P${i}" type="text"
-             class="px-3 py-2 rounded bg-gray-700 border border-gray-600 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-200"
-             placeholder="Player ${i} name" ${i===1 ? "autofocus" : ""}/>
+      <input id="P${i}" type="text" class="px-3 py-2 rounded bg-gray-700 border border-gray-600 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Player ${i} name" ${i===1 ? "autofocus" : ""}/>
     `;
     cont.appendChild(wrapper);
   }
 };
 
+// global
 let players = [];
 
-// Generate rounds
+// tombol generate
 document.getElementById("btnGenerate").addEventListener("click", generateDropdowns);
-document.getElementById("btnClear").addEventListener("click", () => { window.onload(); });
+document.getElementById("btnClear").addEventListener("click", () => {
+  players = [];
+  document.getElementById("roundsForm").classList.add("hidden");
+  document.getElementById("outputSection").classList.add("hidden");
+  window.onload();
+});
 
+// ---------- Buat dropdown (rounds) ----------
 function generateDropdowns() {
   players = [];
   for (let i = 1; i <= 8; i++) {
-    const v = document.getElementById("P"+i).value.trim() || i.toString();
+    const v = document.getElementById("P"+i).value.trim();
+    if (!v) { alert("Semua nama pemain (P1–P8) harus diisi."); return; }
     players.push(v);
+  }
+  if (new Set(players.map(x => x.toLowerCase())).size !== 8) {
+    alert("Nama pemain harus unik (case-insensitive).");
+    return;
   }
 
   const titles = ["I-2","I-3","I-4","II-1","II-2"];
@@ -76,71 +91,146 @@ function generateDropdowns() {
     const row = document.createElement("div");
     row.className = "flex items-center gap-3 bg-gray-700 p-3 rounded";
 
-    row.innerHTML = `
-      <div class="w-16 text-sm text-gray-300">${title}</div>
-      <input type="text" value="${players[0]}" disabled
-             class="px-3 py-2 rounded bg-gray-800 border border-gray-700 text-gray-400 w-20 text-center"/>
-      <div class="text-gray-300 font-medium">vs</div>
-      <select class="px-3 py-2 rounded bg-gray-800 border border-gray-700 text-gray-200 w-full" data-index="${idx}">
-        <option value="">-- pilih lawan --</option>
-        ${players.slice(1).map(p => `<option value="${p}">${p}</option>`).join("")}
-      </select>
-    `;
+    const label = document.createElement("div");
+    label.className = "w-16 text-sm text-gray-300";
+    label.textContent = title;
+
+    const fixed = document.createElement("input");
+    fixed.type = "text";
+    fixed.value = players[0];
+    fixed.disabled = true;
+    fixed.className = "px-3 py-2 rounded bg-gray-800 border border-gray-700 text-gray-400 w-28 cursor-not-allowed";
+
+    const vs = document.createElement("div");
+    vs.className = "text-gray-300 font-medium";
+    vs.textContent = "vs";
+
+    const sel = document.createElement("select");
+    sel.className = "px-3 py-2 rounded bg-gray-800 border border-gray-700 text-gray-200 w-full";
+    sel.dataset.index = idx;
+    sel.innerHTML = `<option value="">-- pilih lawan --</option>`;
+
+    row.appendChild(label);
+    row.appendChild(fixed);
+    row.appendChild(vs);
+    row.appendChild(sel);
     roundsDiv.appendChild(row);
+  });
+
+  updateDropdowns();
+  document.querySelectorAll("#rounds select").forEach(sel => {
+    sel.addEventListener("change", updateDropdowns);
   });
 
   document.getElementById("roundsForm").classList.remove("hidden");
   document.getElementById("outputSection").classList.add("hidden");
 }
 
-// Solve
+// update opsi dropdown
+function updateDropdowns() {
+  const selects = Array.from(document.querySelectorAll("#rounds select"));
+  const used = selects.map(s => s.value).filter(v => v);
+
+  selects.forEach(sel => {
+    const current = sel.value;
+    const opts = ["<option value=''>-- pilih lawan --</option>"]
+      .concat(
+        players.filter(p => p !== players[0] && (!used.includes(p) || p === current))
+               .map(p => `<option value="${escapeHtml(p)}" ${p===current?"selected":""}>${escapeHtml(p)}</option>`)
+      ).join("");
+    sel.innerHTML = opts;
+  });
+}
+
+function escapeHtml(s) {
+  return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+}
+
+// ---------- Solve ----------
 document.getElementById("btnSolve").addEventListener("click", solve);
 
 function solve() {
-  const selects = Array.from(document.querySelectorAll("#rounds select"));
+  const outputSection = document.getElementById("outputSection");
+  const output = document.getElementById("output");
+  output.innerHTML = "";
+  outputSection.classList.add("hidden");
+
+  const players = [];
+  for (let i = 1; i <= 8; i++) {
+    const v = document.getElementById("P"+i).value.trim();
+    if (!v) { alert("Semua nama pemain (P1–P8) harus diisi."); return; }
+    players.push(v);
+  }
+
+  const selects = Array.from(document.querySelectorAll("#rounds select"))
+                       .sort((a,b) => Number(a.dataset.index) - Number(b.dataset.index));
   const chosen = selects.map(s => s.value).filter(v => v);
 
-  if (chosen.length < 5) {
-    alert("Isi semua 5 ronde terlebih dahulu.");
+  if (chosen.length < 5) { 
+    alert("Isi semua 5 ronde terlebih dahulu."); 
+    return; 
+  }
+
+  const remaining = players.filter(p => p !== players[0] && !chosen.includes(p));
+  if (remaining.length !== 2) {
+    alert("Data tidak konsisten. Sisa lawan harus 2 orang.");
     return;
   }
 
-  // semua pemain selain P1
-  const others = players.slice(1);
+  let seq1 = [];
+  let seq2 = [];
 
-  // cari baki (remaining)
-  const remaining = others.filter(p => !chosen.includes(p));
+  // II-4, II-5 (swap kemungkinan)
+  seq1.push(`II-4 : ${remaining[0]}`);
+  seq1.push(`II-5 : ${remaining[1]}`);
+  seq2.push(`II-4 : ${remaining[1]}`);
+  seq2.push(`II-5 : ${remaining[0]}`);
 
-  // pattern title rounds
-  const titles = ["II-4","II-5","II-6","III-1","III-2","III-4","III-5","III-6","IV-1","IV-2","IV-4","IV-5"];
+  // II-6 = chosen[2]
+  seq1.push(`II-6 : ${chosen[2]}`);
+  seq2.push(`II-6 : ${chosen[2]}`);
 
-  // hasil clone pattern asal PHP → rotate 2 kemungkinan
-  const seq1 = [];
-  const seq2 = [];
+  // III
+  seq1.push(`III-1 : ${chosen[1]}`);
+  seq1.push(`III-2 : ${chosen[3]}`);
+  seq1.push(`III-4 : ${chosen[4]}`);
+  seq1.push(`III-5 : ${chosen[0]}`);
+  seq1.push(`III-6 : ${remaining[0]}`);
 
-  titles.forEach((title, i) => {
-    if (i < remaining.length) {
-      seq1.push(`${title} : ${remaining[i]}`);
-      seq2.push(`${title} : ${remaining[remaining.length - 1 - i]}`);
-    } else {
-      const idx = (i - remaining.length) % chosen.length;
-      seq1.push(`${title} : ${chosen[idx]}`);
-      seq2.push(`${title} : ${chosen[chosen.length - 1 - idx]}`);
-    }
-  });
+  seq2.push(`III-1 : ${chosen[1]}`);
+  seq2.push(`III-2 : ${chosen[3]}`);
+  seq2.push(`III-4 : ${chosen[4]}`);
+  seq2.push(`III-5 : ${chosen[0]}`);
+  seq2.push(`III-6 : ${remaining[1]}`);
 
-  const output = document.getElementById("output");
-  output.innerHTML = `
-    <div class="bg-gray-900 rounded p-4 border border-gray-700">
-      <h3 class="text-indigo-300 font-semibold mb-2">Kemungkinan 1</h3>
-      <pre class="text-green-400 font-mono text-sm">${seq1.join("\n")}</pre>
-    </div>
-    <div class="bg-gray-900 rounded p-4 border border-gray-700">
-      <h3 class="text-indigo-300 font-semibold mb-2">Kemungkinan 2</h3>
-      <pre class="text-green-400 font-mono text-sm">${seq2.join("\n")}</pre>
-    </div>
-  `;
-  document.getElementById("outputSection").classList.remove("hidden");
+  // IV
+  seq1.push(`IV-1 : ${remaining[1]}`);
+  seq1.push(`IV-2 : ${chosen[2]}`);
+  seq1.push(`IV-4 : ${chosen[1]}`);
+  seq1.push(`IV-5 : ${chosen[3]}`);
+
+  seq2.push(`IV-1 : ${remaining[0]}`);
+  seq2.push(`IV-2 : ${chosen[2]}`);
+  seq2.push(`IV-4 : ${chosen[1]}`);
+  seq2.push(`IV-5 : ${chosen[3]}`);
+
+  const card = (title, seq) => {
+    const div = document.createElement("div");
+    div.className = "bg-gray-900 rounded p-4 border border-gray-700";
+    const h = document.createElement("h3");
+    h.className = "text-indigo-300 font-semibold mb-2";
+    h.textContent = title;
+    const pre = document.createElement("pre");
+    pre.className = "text-green-400 whitespace-pre-wrap font-mono text-sm";
+    pre.textContent = seq.join("\n");
+    div.appendChild(h); div.appendChild(pre);
+    return div;
+  };
+
+  output.appendChild(card("Kemungkinan 1", seq1));
+  output.appendChild(card("Kemungkinan 2", seq2));
+  outputSection.classList.remove("hidden");
+  output.scrollIntoView({behavior:"smooth", block:"center"});
 }
 </script>
 </body>
